@@ -1,0 +1,6 @@
+-std=c99
+-Wall
+-Wextra
+-Iinclude
+-Isrc
+--target=x86_64-w64-mingw32

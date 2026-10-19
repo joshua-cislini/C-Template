@@ -1,0 +1,16 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy",
+        "--completion-style=detailed",
+        "--header-insertion=never"
+    ],
+    "files.associations": {
+        "*.h": "c"
+    },
+    "makefile.makePath": "mingw32-make",
+    "makefile.configureOnOpen": true,
+    "debug.onTaskErrors": "showErrors",
+    "explorer.confirmDelete": false
+}
