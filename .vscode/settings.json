@@ -2,9 +2,6 @@
     "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.formatting": "clangFormat",
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "[c][cpp]": {
-        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
-    },
     "clangd.arguments": [
         "--background-index",
         "--clang-tidy",
