@@ -1,10 +1,21 @@
 # C Multi-File Project Template
 
-A simple C project using **GCC**, **MinGW**, **Make**, **GDB**, **clangd**, and **Clang-Format**, designed for development in **Visual Studio Code**.
+A ready-to-use **Visual Studio Code** C development environment for **Windows**, using **MSYS2 UCRT64**, **GCC**, **GNU Make**, **GDB**.
+
+The template provides:
+
+- GCC as the C compiler.
+- GNU ld as the linker.
+- clangd for autocomplete, diagnostics, syntax highlighting, and code navigation.
+- Clang-Format for automatic code formatting.
+- GNU Make for building and managing the project.
+- GDB for debugging.
+- Automatic DLL copying.
+- Multi-file compilation with automatic header dependency tracking.
 
 ---
 
-## Project Structure
+# 1. Project Structure
 
 ```text
 MyProject/
@@ -23,9 +34,14 @@ MyProject/
 │   ├── test.h
 │   └── ...
 │
+├── lib/
+│   └── (static and import libraries)
+│
+├── dll/
+│   └── (runtime DLL files)
+│
 ├── build/
 │   ├── program.exe
-│   │
 │   └── obj/
 │       ├── main.o
 │       ├── main.d
@@ -35,200 +51,405 @@ MyProject/
 └── .vscode/
     ├── settings.json
     ├── tasks.json
-    └── launch.json
+    ├── launch.json
+    └── extensions.json
 ```
 
 ### Directories
 
-| Directory    | Purpose                                         |
-| ------------ | ----------------------------------------------- |
-| `src/`       | C source files (`.c`)                           |
-| `include/`   | Header files (`.h`)                             |
-| `build/`     | Compiled output                                 |
-| `build/obj/` | Object files (`.o`) and dependency files (`.d`) |
-| `.vscode/`   | VS Code configuration                           |
+| Directory | Purpose |
+|---|---|
+| `src/` | C source files |
+| `include/` | Project header files |
+| `lib/` | Static and import libraries (`.a`, `.dll.a`) |
+| `dll/` | Runtime DLL files |
+| `build/` | Compiled executable |
+| `build/obj/` | Object and dependency files |
+| `.vscode/` | VS Code configuration |
 
-### Important files
-
-| File                | Purpose                                             |
-| ------------------- | --------------------------------------------------- |
-| `Makefile`          | Controls compilation, linking, running, and cleaning |
-| `compile_flags.txt` | Defines include paths and flags for `clangd`       |
-| `README.md`         | Project documentation                               |
-| `.clang-format`     | Defines the project's C/C++ code formatting style   |
-| `main.c`            | Program entry point                                 |
-| `.h` files          | Function declarations and shared definitions        |
-| `.c` files          | Function implementations                            |
+The `build/` directory is generated automatically.
 
 ---
 
-# Building the Project
+# 2. Installing MSYS2
 
-## Requirements
+Download MSYS2 from:
 
-The following tools must be installed and available from the terminal:
+https://www.msys2.org/
 
-* GCC / MinGW
-* `mingw32-make`
-* GDB
-* Visual Studio Code
-* **VS Code Extensions**:
-  * `llvm-vs-code-extensions.vscode-clangd` (Language Server & Intellisense)
-  * `ms-vscode.cpptools` (Required for GDB Debugging only)
-
----
-
-## Build
-
-Open a terminal in the project root:
+Install it using the default installation directory:
 
 ```text
-mingw32-make
+C:\msys64
 ```
 
-This compiles all `.c` files in `src/` and links them into:
+If you choose another location, update the paths in the VS Code configuration files accordingly.
+
+## Update MSYS2
+
+Open the MSYS2 terminal and execute:
+
+```bash
+pacman -Syu
+```
+
+If the terminal asks you to close, do so, reopen MSYS2 and run the command again until all updates are complete.
+
+## Install the UCRT64 toolchain
+
+Open the **MSYS2 UCRT64** terminal from the Windows Start menu.
+
+Install the compiler, debugger, build tools, and LLVM utilities:
+
+```bash
+pacman -S --needed \
+    mingw-w64-ucrt-x86_64-gcc \
+    mingw-w64-ucrt-x86_64-gdb \
+    mingw-w64-ucrt-x86_64-make \
+    mingw-w64-ucrt-x86_64-clang \
+    mingw-w64-ucrt-x86_64-clang-tools-extra
+```
+
+This provides:
+
+| Package | Purpose |
+|---|---|
+| GCC | C compiler |
+| GNU ld | Linker |
+| GDB | Debugger |
+| GNU Make | Build system |
+| clangd | Language server |
+| Clang-Format | Code formatting |
+| Clang-Tidy | Static analysis |
+
+The tools are installed in:
+
+```text
+C:\msys64\ucrt64\bin
+```
+
+## Verify the installation
+
+In the UCRT64 terminal, execute:
+
+```bash
+gcc --version
+gdb --version
+mingw32-make --version
+clangd --version
+clang-format --version
+```
+
+All commands should return version information.
+
+---
+
+# 3. Installing Visual Studio Code
+
+Download VS Code:
+
+https://code.visualstudio.com/
+
+Install these extensions:
+
+| Extension | Identifier | Purpose |
+|---|---|---|
+| clangd | `llvm-vs-code-extensions.vscode-clangd` | IntelliSense and language support |
+| C/C++ | `ms-vscode.cpptools` | GDB debugging integration |
+
+The C/C++ extension is used for debugging. clangd remains responsible for code intelligence.
+
+---
+
+# 4. Compiler Configuration
+
+The project uses **GCC**, not Clang.
+
+The compiler is located at:
+
+```text
+C:\msys64\ucrt64\bin\gcc.exe
+```
+
+The linker is GNU ld, which GCC invokes automatically.
+
+The project targets 64-bit Windows using the MinGW-w64 toolchain.
+
+---
+
+# 5. Makefile
+
+The Makefile handles compilation, linking, execution, and cleaning.
+
+It automatically:
+
+- Finds all `.c` files in `src/`.
+- Creates the required build directories.
+- Compiles source files separately.
+- Tracks header dependencies.
+- Links all object files.
+- Copies DLL files from `dll/` into `build/`.
+
+The Makefile uses MSYS2 Bash for its Unix-style commands.
+
+## Available targets
+
+| Command | Action |
+|---|---|
+| `mingw32-make` | Build the project |
+| `mingw32-make run` | Build and run |
+| `mingw32-make clean` | Delete build files |
+| `mingw32-make rebuild` | Clean and build again |
+
+## Adding external libraries
+
+To use an external library:
+
+1. Place its headers in `include/` or another appropriate directory.
+2. Place its static or import library in `lib/`.
+3. Place required runtime DLLs in `dll/`.
+
+Then configure the Makefile:
+
+```makefile
+CPPFLAGS += -Iinclude
+LDFLAGS += -Llib
+LDLIBS += -lname
+```
+
+Replace `name` with the actual library name.
+
+For example, a library named `example` would generally use:
+
+```makefile
+LDLIBS += -lexample
+```
+
+Its runtime DLL, if required, should be placed in `dll/`.
+
+---
+
+# 6. VS Code Build Configuration
+
+The VS Code tasks are defined in:
+
+```text
+.vscode/tasks.json
+```
+
+The default build shortcut is:
+
+**Ctrl + Shift + B**
+
+It executes the Build task, which calls:
+
+```bash
+mingw32-make -j4
+```
+
+The Make executable is located at:
+
+```text
+C:\msys64\ucrt64\bin\mingw32-make.exe
+```
+
+The task adds the UCRT64 and MSYS2 directories to PATH so the compiler and shell utilities can be found.
+
+---
+
+# 7. Running and Debugging
+
+The debugger configuration is defined in:
+
+```text
+.vscode/launch.json
+```
+
+The executable is:
 
 ```text
 build/program.exe
 ```
 
-You can also use the VS Code build shortcut:
-
-**`Ctrl + Shift + B`**
-
----
-
-# Run
-
-To build and run the program:
+The debugger is:
 
 ```text
-mingw32-make run
+C:\msys64\ucrt64\bin\gdb.exe
 ```
 
-Or run the executable directly:
+## Keyboard shortcuts
 
-```text
-build/program.exe
-```
+| Shortcut | Action |
+|---|---|
+| `Ctrl + Shift + B` | Build |
+| `Ctrl + F5` | Build and run without debugging |
+| `F5` | Build and start debugging |
+| `F10` | Step over |
+| `F11` | Step into |
+| `Shift + F11` | Step out |
+| `Shift + F5` | Stop debugging |
 
----
+Both running configurations execute the Build task first, ensuring that the executable is up to date.
 
-# Debug
+Program output is displayed in VS Code's integrated terminal.
 
-Press:
+## Breakpoints
 
-**`F5`**
+Click next to a line number to create a breakpoint.
 
-VS Code will:
+When debugging, you can inspect:
 
-1. Run the `Build` task.
-2. Compile the project using Make.
-3. Start GDB.
-4. Launch `build/program.exe`.
-5. Allow debugging with breakpoints and stepping.
-
-Useful debugging shortcuts:
-
-| Key           | Action                     |
-| ------------- | -------------------------- |
-| `F5`          | Start / continue debugging |
-| `F10`         | Step over                  |
-| `F11`         | Step into                  |
-| `Shift + F11` | Step out                   |
-| `Shift + F5`  | Stop debugging             |
+- Local variables.
+- Global variables.
+- The call stack.
+- Watch expressions.
+- Memory.
 
 ---
 
-# Language Server (`clangd`) & `compile_flags.txt`
+# 8. clangd and compile_flags.txt
 
-This project uses **`clangd`** for code navigation, autocompletion, diagnostics, and code analysis.
+This project uses **clangd** for:
 
-To ensure `clangd` knows where project headers and target architecture flags live, the project includes a **`compile_flags.txt`** file in the root directory:
+- Autocomplete.
+- Syntax highlighting.
+- Diagnostics.
+- Code navigation.
+- Go to definition.
+- Find references.
+- Header resolution.
+
+clangd is not the compiler. It independently analyzes your source code using the compilation flags provided in `compile_flags.txt`.
+
+The file is located in the project root.
+
+Example:
 
 ```text
+--target=x86_64-w64-windows-gnu
 -std=c99
 -Wall
 -Wextra
+-Wpedantic
 -Iinclude
 -Isrc
---target=x86_64-w64-mingw32
 ```
 
-`clangd` automatically reads `compile_flags.txt` and uses it to resolve `#include` directives and type checks without requiring complex JSON configurations.
+Whenever you add additional include directories or change important compiler flags, update this file accordingly.
 
 ---
 
-# Clean
+# 9. Code Formatting
 
-To remove all compiled files:
+The project uses **Clang-Format**.
 
-```text
-mingw32-make clean
-```
-
-This deletes the entire `build/` directory.
-
----
-
-# Rebuild
-
-To completely clean and rebuild the project:
-
-```text
-mingw32-make clean
-mingw32-make
-```
-
-Or use the VS Code `Rebuild` task.
-
----
-
-# Code Formatting
-
-This project uses **Clang-Format** to keep the source code consistently formatted.
-
-The formatting rules are stored in:
+Formatting rules are stored in:
 
 ```text
 .clang-format
 ```
 
-This file is located in the **root of the project** so that the same formatting rules can be used throughout the entire project.
+VS Code can format code automatically when:
 
-## VS Code formatting
+- Pasting code.
+- Typing code.
+- Saving a file.
 
-VS Code uses `clangd` (via `Clang-Format`) to format C source and header files automatically when:
+Manual formatting:
 
-* pasting code
-* typing code
-* saving a file
+**Shift + Alt + F**
 
-The relevant settings in `.vscode/settings.json`:
-
-```json
-"editor.formatOnPaste": true,
-"editor.formatOnType": true,
-"editor.formatOnSave": true,
-"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-"C_Cpp.intelliSenseEngine": "Disabled"
-```
-
-## Manual formatting
-
-Use:
-
-**`Shift + Alt + F`**
-
-or:
-
-1. Right-click inside the source file.
-2. Select **Format Document**.
+The formatter is provided by the LLVM tooling.
 
 ---
 
-# License
+# 10. Building Manually
 
-This project is licensed under the **MIT License**.
+Open a UCRT64 terminal in the project directory.
 
-See the [`LICENSE`](LICENSE) file for the complete license text.
+Build:
+
+```bash
+mingw32-make
+```
+
+Build and run:
+
+```bash
+mingw32-make run
+```
+
+Clean:
+
+```bash
+mingw32-make clean
+```
+
+Rebuild:
+
+```bash
+mingw32-make rebuild
+```
+
+Alternatively, use the VS Code shortcuts.
+
+---
+
+# 11. Important Notes
+
+### Do not mix toolchains
+
+This project uses UCRT64.
+
+Avoid mixing precompiled libraries, object files, and runtime dependencies from incompatible MSYS2 environments, especially MINGW64 and CLANG64.
+
+### Changing compilers
+
+If you change compiler or important compiler flags, clean the project first:
+
+```bash
+mingw32-make clean
+```
+
+This prevents old object files from being linked with newly compiled files.
+
+### DLL files
+
+DLLs placed in `dll/` are automatically copied into `build/` when linking the executable.
+
+The executable can then find those DLLs alongside itself.
+
+### Adding source files
+
+Simply place additional `.c` files inside `src/`.
+
+Make automatically detects them on the next build.
+
+### Adding headers
+
+Place project headers inside `include/`.
+
+Header dependencies are automatically tracked through generated `.d` files.
+
+---
+
+# 12. License
+
+This project is licensed under the MIT License.
+
+See the `LICENSE` file for the complete license text.
+
+---
+
+**Toolchain summary**
+
+| Component | Tool |
+|---|---|
+| Compiler | GCC |
+| Linker | GNU ld |
+| Language server | clangd |
+| Formatter | Clang-Format |
+| Build system | GNU Make |
+| Debugger | GDB |
+| Environment | MSYS2 UCRT64 |
+| Editor | Visual Studio Code |

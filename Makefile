@@ -1,82 +1,67 @@
-# ============================================================
+# Use MSYS2 Bash for Unix-style commands
+SHELL := C:/msys64/usr/bin/bash.exe
+.SHELLFLAGS := -c
+
 # Compiler
-# ============================================================
+CC := gcc
 
-CC = gcc
+# Project configuration
+TARGET := program
 
-# ============================================================
-# Project name
-# ============================================================
+SRC_DIR := src
+INC_DIR := include
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
 
-TARGET = program
+# Compiler flags
+CFLAGS := -std=c99 -Wall -Wextra -Wpedantic -g -O0
+CPPFLAGS := -I$(INC_DIR) -I$(SRC_DIR)
 
-# ============================================================
-# Compiler / linker flags
-# ============================================================
+# Linker flags and libraries
+LDFLAGS :=
+LDLIBS :=
 
-CFLAGS = -std=c99 -Wall -Wextra -g
-CPPFLAGS = -Iinclude
-LDLIBS = -lm
+# Source and object files
+SOURCES := $(wildcard $(SRC_DIR)/*.c)
+OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
+DEPS := $(OBJECTS:.o=.d)
 
-# ============================================================
-# Directories
-# ============================================================
+OUTPUT := $(BUILD_DIR)/$(TARGET).exe
 
-SRC_DIR = src
-BUILD_DIR = build
-OBJ_DIR = $(BUILD_DIR)/obj
+# Targets
+.PHONY: all run clean rebuild
 
-# ============================================================
-# Source / object / dependency files
-# ============================================================
+all: $(OUTPUT)
 
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+# Link object files
+$(OUTPUT): $(OBJECTS)
+	@mkdir -p "$(BUILD_DIR)"
+	$(CC) $(LDFLAGS) -o "$@" $(OBJECTS) $(LDLIBS)
 
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+	# Copy DLL files if the dll directory exists
+	@if [ -d "dll" ]; then \
+		for file in dll/*.dll; do \
+			[ -f "$$file" ] && cp -f "$$file" "$(BUILD_DIR)/"; \
+		done; \
+	fi
 
-DEPS = $(OBJS:.o=.d)
-
-# ============================================================
-# Default target
-# ============================================================
-
-.PHONY: all
-all: $(BUILD_DIR)/$(TARGET).exe
-
-# ============================================================
-# Link
-# ============================================================
-
-$(BUILD_DIR)/$(TARGET).exe: $(OBJS)
-	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
-	$(CC) $(OBJS) $(LDLIBS) -o $@
-
-# ============================================================
-# Compile
-# ============================================================
-
+# Compile source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@if not exist "$(OBJ_DIR)" mkdir "$(OBJ_DIR)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MP -c $< -o $@
+	@mkdir -p "$(OBJ_DIR)"
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c "$<" -o "$@"
 
-# ============================================================
 # Include automatically generated dependencies
-# ============================================================
-
 -include $(DEPS)
 
-# ============================================================
-# Run
-# ============================================================
+# Run the program
+run: $(OUTPUT)
+	./$(OUTPUT)
 
-.PHONY: run
-run: $(BUILD_DIR)/$(TARGET).exe
-	$(BUILD_DIR)\$(TARGET).exe
-
-# ============================================================
-# Clean
-# ============================================================
-
-.PHONY: clean
+# Remove build files
 clean:
-	@if exist "$(BUILD_DIR)" rmdir /S /Q "$(BUILD_DIR)"
+	rm -rf "$(BUILD_DIR)"
+
+# Clean and rebuild
+rebuild:
+	$(MAKE) clean
+	$(MAKE) all
