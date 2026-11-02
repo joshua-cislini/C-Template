@@ -128,6 +128,31 @@ The tools are installed in:
 C:\msys64\ucrt64\bin
 ```
 
+## Add MSYS2 directories to the Windows PATH
+
+Add both of the following directories to the Windows `Path` environment variable:
+
+```text
+C:\msys64\usr\bin
+C:\msys64\ucrt64\bin
+```
+
+The first directory provides MSYS2 utilities such as `bash.exe` and `rm.exe`. The second provides the UCRT64 compiler and development tools. Adding both paths helps these tools remain available to terminals and processes launched by Windows.
+
+You can add the paths to either your **User `Path`** (only your Windows account) or **System `Path`** (all users; administrator permission may be required). Do not replace the existing `Path` entries. Add the two directories as separate entries.
+
+To edit `Path`:
+
+1. Open the Windows Start menu and search for **Edit environment variables for your account** or **Edit the system environment variables**.
+2. Open **Environment Variables** if necessary.
+3. Under **User variables** or **System variables**, select `Path` and click **Edit**.
+4. Click **New** and add `C:\msys64\usr\bin`.
+5. Click **New** again and add `C:\msys64\ucrt64\bin`.
+6. Confirm all dialogs with **OK**.
+7. **Restart the PC** so applications and processes start with the updated environment.
+
+If MSYS2 was installed in a different directory, use the corresponding `usr\bin` and `ucrt64\bin` paths for that installation.
+
 ## Verify the installation
 
 In the UCRT64 terminal, execute:
