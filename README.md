@@ -106,10 +106,10 @@ Each directory contains a dedicated `README.md` detailing its conventions, disco
 │   ├── tasks.json            # Build, test, clean, format, tidy, and auto-configure tasks
 │   └── README.md             # Guide: VS Code tasks, debugging profiles, MSYS2 PATH injection
 │
-└── .github/                  # [README] GitHub Actions automation
-    ├── workflows/
-    │   └── ci.yml            # Multi-OS matrix CI (Linux, macOS, Windows UCRT64, ASan/UBSan)
-    └── README.md             # Guide: CI matrix, reproducible local checks, pull request gate
+└── .github/                  # GitHub Actions configuration
+    └── workflows/            # [README] Multi-OS matrix CI
+        ├── ci.yml            # Workflow definition (Linux, macOS, Windows UCRT64, ASan/UBSan)
+        └── README.md         # Guide: CI matrix, reproducible local checks, pull request gate
 ```
 
 ---
@@ -414,7 +414,7 @@ The repository includes a ready-to-run multi-platform CI workflow in [`.github/w
 - **Windows (MSYS2 UCRT64)**: Debug build, test run, Release build.
 - **Clang-Format Gate**: Verifies style compliance across all files.
 
-See [`.github/README.md`](.github/README.md) for local verification steps.
+See [`.github/workflows/README.md`](.github/workflows/README.md) for local verification steps.
 
 ---
 

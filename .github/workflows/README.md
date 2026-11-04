@@ -1,4 +1,4 @@
-# `.github/` — Continuous Integration (CI) Automation
+# `.github/workflows/` — Continuous Integration (CI) Automation
 
 This directory contains GitHub Actions workflows that automatically build, test, analyze, and format-check the project across all major operating systems on every commit and pull request.
 
@@ -6,7 +6,7 @@ This directory contains GitHub Actions workflows that automatically build, test,
 
 ## Workflow Overview: `ci.yml`
 
-The CI workflow is defined in [`.github/workflows/ci.yml`](workflows/ci.yml) and triggers on:
+The CI workflow is defined in [`ci.yml`](ci.yml) and triggers on:
 - Every `push` to any branch
 - Every `pull_request` targeting any branch
 - Manual execution via `workflow_dispatch`

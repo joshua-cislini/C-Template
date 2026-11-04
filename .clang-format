@@ -139,7 +139,7 @@ AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: Never
 
 # Merge a short switch-expression rule (`case 1 -> 1;`) onto one line.
-AllowShortCaseExpressionOnASingleLine: true
+# AllowShortCaseExpressionOnASingleLine: true     # v19: merge short switch-expression rules
 
 # Merge `case 1: return;` onto one line.
 AllowShortCaseLabelsOnASingleLine: true
