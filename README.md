@@ -1,108 +1,85 @@
-# C Multi-File Project Template
+# Modern C Project Template
 
-A ready-to-use **Visual Studio Code** C development environment for **Windows**, using **MSYS2 UCRT64**, **GCC**, **GNU Make**, **GDB**.
+A professional, cross-platform, zero-friction C project template designed for real-world projects.
 
-The template provides:
-
-- GCC as the C compiler.
-- GNU ld as the linker.
-- clangd for autocomplete, diagnostics, syntax highlighting, and code navigation.
-- Clang-Format for automatic code formatting.
-- GNU Make for building and managing the project.
-- GDB for debugging.
-- Automatic drop-in library discovery and linking (`lib/`).
-- Automatic DLL copying (`dll/`).
-- Multi-file compilation with automatic header dependency tracking.
+Compiles out of the box on **Windows** (MSYS2 UCRT64, native `cmd.exe`, PowerShell, Git Bash), **Linux**, and **macOS** with **GNU Make**, **GCC** or **Clang**, **clangd**, **GDB/LLDB**, and **VS Code**.
 
 ---
 
-# 1. Project Structure
+## Highlights
 
-```text
-MyProject/
-│
-├── .clang-format
-├── .gitignore
-├── compile_flags.txt
-├── LICENSE
-├── Makefile
-├── README.md
-│
-├── src/
-│   ├── main.c
-│   ├── test.c
-│   └── ...
-│
-├── include/
-│   ├── test.h
-│   └── ...
-│
-├── lib/
-│   └── (static and import libraries: .a, .lib, .dll.a)
-│
-├── dll/
-│   └── (runtime DLL files)
-│
-├── build/
-│   ├── program.exe
-│   └── obj/
-│       ├── main.o
-│       ├── main.d
-│       ├── test.o
-│       └── test.d
-│
-└── .vscode/
-    ├── settings.json
-    ├── tasks.json
-    ├── launch.json
-    └── extensions.json
-```
-
-### Directories
-
-| Directory | Purpose |
-|---|---|
-| `src/` | C source files |
-| `include/` | Project header files |
-| `lib/` | Static and import libraries (`.a`, `.lib`, `.dll.a`) |
-| `dll/` | Runtime DLL files |
-| `build/` | Compiled executable |
-| `build/obj/` | Object and dependency files |
-| `.vscode/` | VS Code configuration |
-
-The `build/` directory is generated automatically.
+- **Zero-Config Drag-and-Drop Dependencies (`dependencies/`)**: Drop external libraries (`.h`, `.a`, `.lib`, `.dll.a`) or complete SDK folders into `dependencies/` and build immediately. No manual Makefile edits required.
+- **Automatic Runtime Library Deployment**: Windows DLLs (and Linux/macOS shared objects) in `dependencies/` are automatically copied directly alongside the target executable on every build.
+- **Single Configuration File (`config.mk`)**: All project knobs (binary name, project type, C standard, warning levels, compiler, flags) live in `config.mk`. The generic `Makefile` never needs editing.
+- **Three Target Types**: Switch between `executable`, `static` library (`lib<name>.a`), or `shared` library (`.dll` / `.so` / `.dylib`) by changing a single variable.
+- **Dual Build Modes**: Clean separation of `build/debug/` and `build/release/` artifacts.
+- **Header Dependency Tracking**: Incremental builds track header changes automatically via compiler-generated `.d` files.
+- **Auto-Generated `compile_commands.json`**: Accurate compilation database generated directly from the build configuration on every run, powering **clangd** with zero configuration drift.
+- **Built-in Unit Testing (`make test`)**: Standalone, multi-suite test harness with a lightweight, zero-dependency testing helper (`tests/test_framework.h`).
+- **Sanitizer Support**: One-command sanitizer builds via `make SANITIZE=address,undefined`.
+- **First-Class Tooling**: Pre-configured **Clang-Format** (formatting), **Clang-Tidy** (static analysis), and **EditorConfig** (editor consistency).
+- **Turnkey VS Code Integration**: Rich `tasks.json` (build, run, test, format, tidy), `launch.json` (F5 debug with GDB/LLDB pretty printing), and `settings.json`.
+- **Pre-Configured GitHub Actions CI**: Multi-platform matrix testing on Ubuntu (GCC & Clang), macOS (Clang), and Windows (MSYS2 UCRT64).
 
 ---
 
-# 2. Installing MSYS2
-
-Download MSYS2 from:
-
-https://www.msys2.org/
-
-Install it using the default installation directory:
+## Project Structure
 
 ```text
-C:\msys64
+.
+├── config.mk                 # Project identity, flags, and build configuration
+├── Makefile                  # Portable build engine (POSIX sh & Windows cmd.exe)
+├── .clang-format             # Code formatting rules
+├── .clang-tidy               # Static analysis rules
+├── .editorconfig             # Editor whitespace and indent definitions
+├── .gitattributes            # Line endings and binary file handling
+├── .gitignore                # Ignores build artifacts and editor caches
+│
+├── src/                      # C source files (compiled automatically)
+│   ├── main.c                # Application entry point (excluded during test builds)
+│   └── greeting.c            # Example implementation
+│
+├── include/                  # Public project headers
+│   └── greeting.h            # Example header
+│
+├── tests/                    # Unit tests (compiled and run by `make test`)
+│   ├── test_framework.h      # Minimal, dependency-free test assertion macros
+│   └── test_greeting.c       # Example test suite
+│
+├── dependencies/             # External third-party libraries (drop-in)
+│   ├── README.md             # Guide on library layouts and linking
+│   ├── include/              # Loose third-party headers
+│   ├── lib/                  # Loose third-party libraries (.a, .lib, .dll.a)
+│   ├── bin/                  # Loose runtime files (.dll)
+│   └── <package>/            # (Optional) Extracted SDK folders (include/, lib/, bin/)
+│
+├── build/                    # Generated automatically (ignored by git)
+│   ├── debug/
+│   │   ├── bin/              # Executables and copied runtime DLLs
+│   │   └── obj/              # Object (.o) and dependency (.d) files
+│   └── release/
+│       ├── bin/
+│       └── obj/
+│
+└── .vscode/                  # Editor & debugger configurations
+    ├── extensions.json       # Recommended extensions (clangd, cpptools)
+    ├── launch.json           # F5 debug launcher (GDB/LLDB)
+    ├── settings.json         # clangd & formatting settings
+    └── tasks.json            # Build, test, clean, and analyze tasks
 ```
 
-If you choose another location, update the paths in the VS Code configuration files accordingly.
+---
 
-## Update MSYS2
+## Quick Start
 
-Open the MSYS2 terminal and execute:
+### 1. Requirements
 
-```bash
-pacman -Syu
-```
+- A C compiler: **GCC** or **Clang**
+- **GNU Make** (version 4.0 or newer recommended)
+- Optional: **clangd** (language server), **clang-format**, **clang-tidy**, **GDB** or **LLDB**
 
-If the terminal asks you to close, do so, reopen MSYS2 and run the command again until all updates are complete.
-
-## Install the UCRT64 toolchain
-
-Open the **MSYS2 UCRT64** terminal from the Windows Start menu.
-
-Install the compiler, debugger, build tools, and LLVM utilities:
+#### Windows (MSYS2 UCRT64 — Recommended)
+Install [MSYS2](https://www.msys2.org/), open the **MSYS2 UCRT64** terminal, and install the complete toolchain:
 
 ```bash
 pacman -S --needed \
@@ -113,378 +90,206 @@ pacman -S --needed \
     mingw-w64-ucrt-x86_64-clang-tools-extra
 ```
 
-This provides:
+Add `C:\msys64\ucrt64\bin` and `C:\msys64\usr\bin` to your Windows `PATH` environment variable.
 
-| Package | Purpose |
-|---|---|
-| GCC | C compiler |
-| GNU ld | Linker |
-| GDB | Debugger |
-| GNU Make | Build system |
-| clangd | Language server |
-| Clang-Format | Code formatting |
-| Clang-Tidy | Static analysis |
-
-The tools are installed in:
-
-```text
-C:\msys64\ucrt64\bin
-```
-
-## Add MSYS2 directories to the Windows PATH
-
-Add both of the following directories to the Windows `Path` environment variable:
-
-```text
-C:\msys64\usr\bin
-C:\msys64\ucrt64\bin
-```
-
-The first directory provides MSYS2 utilities such as `bash.exe` and `rm.exe`. The second provides the UCRT64 compiler and development tools. Adding both paths helps these tools remain available to terminals and processes launched by Windows.
-
-You can add the paths to either your **User `Path`** (only your Windows account) or **System `Path`** (all users; administrator permission may be required). Do not replace the existing `Path` entries. Add the two directories as separate entries.
-
-To edit `Path`:
-
-1. Open the Windows Start menu and search for **Edit environment variables for your account** or **Edit the system environment variables**.
-2. Open **Environment Variables** if necessary.
-3. Under **User variables** or **System variables**, select `Path` and click **Edit**.
-4. Click **New** and add `C:\msys64\usr\bin`.
-5. Click **New** again and add `C:\msys64\ucrt64\bin`.
-6. Confirm all dialogs with **OK**.
-7. **Restart the PC** so applications and processes start with the updated environment.
-
-If MSYS2 was installed in a different directory, use the corresponding `usr\bin` and `ucrt64\bin` paths for that installation.
-
-## Verify the installation
-
-In the UCRT64 terminal, execute:
-
+#### Linux (Debian / Ubuntu)
 ```bash
-gcc --version
-gdb --version
-mingw32-make --version
-clangd --version
-clang-format --version
+sudo apt update
+sudo apt install build-essential gcc gdb clangd clang-format clang-tidy
 ```
 
-All commands should return version information.
+#### macOS (Homebrew)
+```bash
+brew install make llvm
+```
 
 ---
 
-# 3. Installing Visual Studio Code
+### 2. Build and Run
 
-Download VS Code:
+Run from your terminal or command prompt:
 
-https://code.visualstudio.com/
+```bash
+# Debug build (default)
+make
 
-Install these extensions:
+# Run the program
+make run
 
-| Extension | Identifier | Purpose |
+# Pass arguments to the program
+make run ARGS="Ada"
+
+# Run unit tests
+make test
+
+# Release build with optimizations (-O2, stripped symbols)
+make release
+make release run
+```
+
+> **Note for Windows users:** If `make` is not aliased, use `mingw32-make`. The Makefile detects whether it is running under Bash, PowerShell, or native `cmd.exe` and handles paths and commands accordingly.
+
+---
+
+## Customizing Your Project (`config.mk`)
+
+You should rarely need to modify the `Makefile`. All project configurations are defined in `config.mk`:
+
+| Variable | Default | Description |
 |---|---|---|
-| clangd | `llvm-vs-code-extensions.vscode-clangd` | IntelliSense and language support |
-| C/C++ | `ms-vscode.cpptools` | GDB debugging integration |
-| Makefile Tools | `ms-vscode.makefile-tools` | Makefile syntax and target integration |
+| `PROJECT` | Folder name | Name of output binary (defaults to current folder name) |
+| `VERSION` | `0.1.0` | Injected into code as `PROJECT_VERSION` macro |
+| `PROJECT_TYPE` | `executable` | Build output: `executable`, `static`, or `shared` |
+| `BUILD` | `debug` | Default mode: `debug` or `release` |
+| `CC` | `gcc` | Compiler: `gcc`, `clang`, or cross-compiler |
+| `C_STANDARD` | `c17` | C standard (`c99`, `c11`, `c17`, `c23`) |
+| `WARNINGS` | `-Wall -Wextra ...` | Warning flags |
+| `WERROR` | `0` | Treat warnings as errors (set `1` for CI) |
+| `SANITIZE` | *(empty)* | Sanitizers, e.g. `make SANITIZE=address,undefined` |
+| `LDLIBS` | `-lm` | System libraries (e.g. `-lws2_32 -lopengl32`) |
+| `PKG_CONFIG_PACKAGES` | *(empty)* | Packages discovered via `pkg-config` (e.g. `sdl2`) |
 
-When you open this project folder in VS Code, you will be prompted automatically to install these extensions (configured in `.vscode/extensions.json`). The C/C++ extension is used for debugging. clangd remains responsible for code intelligence.
+Any variable can also be overridden from the command line:
 
----
-
-# 4. Compiler Configuration
-
-The project uses **GCC**, not Clang.
-
-The compiler is located at:
-
-```text
-C:\msys64\ucrt64\bin\gcc.exe
+```bash
+make PROJECT=my_app BUILD=release CC=clang
 ```
 
-The linker is GNU ld, which GCC invokes automatically.
+---
 
-The project targets 64-bit Windows using the MinGW-w64 toolchain.
+## Adding Dependencies (Drag-and-Drop)
+
+Adding third-party libraries requires **zero Makefile adjustments**:
+
+### Option A: Loose Files Layout
+Drop files directly into the standard subdirectories:
+- **Headers (`.h`)**: Place in `dependencies/include/`
+- **Libraries (`.a`, `.lib`, `.dll.a`, `.so`, `.dylib`)**: Place in `dependencies/lib/`
+- **Runtime DLLs (`.dll`)**: Place in `dependencies/bin/`
+
+### Option B: Vendor Package Layout
+When downloading precompiled libraries (such as SDL2, cJSON, Raylib, or GLFW), simply extract the library folder directly into `dependencies/<package>/`:
+
+```text
+dependencies/
+└── SDL2/
+    ├── include/
+    │   └── SDL2/
+    │       └── SDL.h
+    ├── lib/
+    │   ├── libSDL2.dll.a
+    │   └── libSDL2main.a
+    └── bin/
+        └── SDL2.dll
+```
+
+### How the Build System Handles Dependencies
+1. **Include paths**: All `dependencies/**/include` directories are automatically added with `-isystem` (compiler warnings in third-party headers are suppressed).
+2. **Auto-linking**: Every `.a`, `.lib`, and `.dll.a` found in library directories is passed to the linker inside `-Wl,--start-group ... -Wl,--end-group` to eliminate order-dependent linking issues.
+3. **Smart library selection**: If both a static archive and an import/shared library exist (e.g. `libfoo.a` and `libfoo.dll.a`), the shared library is preferred automatically.
+4. **Runtime deployment**: Every `.dll` found in `dependencies/**/bin` or `dependencies/**/lib` is automatically copied into `build/<mode>/bin/` alongside your executable.
+5. **Dead-stripping**: `-Wl,--as-needed` ensures libraries that are dropped in but not referenced do not bloat the resulting executable.
+
+Run `make info` anytime to inspect detected include directories, auto-linked libraries, and copied DLLs.
 
 ---
 
-# 5. Makefile
+## Unit Testing
 
-The Makefile handles compilation, linking, execution, and cleaning.
+Place test files in the `tests/` directory named `test_<suite>.c`:
 
-It automatically:
+```c
+#include "greeting.h"
+#include "test_framework.h"
 
-- Finds all `.c` files in `src/`.
-- Creates the required build directories.
-- Compiles source files separately.
-- Tracks header dependencies.
-- Links all object files.
-- Automatically discovers and links all static and import libraries (`.a`, `.lib`, `.dll.a`) in `lib/`.
-- Automatically copies any runtime DLLs from `dll/` into `build/`.
+static void test_greeting(void) {
+    char buffer[64];
+    greeting_format(buffer, sizeof buffer, "Alice");
+    CHECK_EQ_STR("Hello, Alice!", buffer);
+}
 
-The Makefile uses MSYS2 Bash for its Unix-style commands.
+int main(void) {
+    RUN_TEST(test_greeting);
+    return TEST_REPORT();
+}
+```
 
-## Available targets
+Run tests with:
 
-| Command | Action |
+```bash
+make test
+```
+
+The test runner:
+- Compiles all project sources (excluding `src/main.c`).
+- Builds each `tests/test_*.c` file into an isolated executable in `build/<mode>/bin/`.
+- Executes each suite, reports test counts and assertions, and returns a non-zero exit code if any check fails.
+
+---
+
+## Code Quality & Tooling
+
+### Clang-Format
+Format all source files and headers:
+```bash
+make format
+```
+Check if all files conform to the style rules without modifying them:
+```bash
+make format-check
+```
+
+### Clang-Tidy
+Run static analysis across your codebase:
+```bash
+make tidy
+```
+
+### `compile_commands.json`
+Every build automatically regenerates an up-to-date `compile_commands.json` in the project root. This ensures that **clangd** always has the exact compiler flags, macro definitions, and search paths without requiring any manual updates.
+
+---
+
+## Make Targets Reference
+
+| Target | Description |
 |---|---|
-| `mingw32-make` | Build the project |
-| `mingw32-make run` | Build and run |
-| `mingw32-make clean` | Delete build files |
-| `mingw32-make rebuild` | Clean and build again |
-
-## Adding external libraries (Drop-In)
-
-Adding external libraries is completely automated:
-
-1. Place library header files in `include/` (or subdirectories of `include/`).
-2. Place static or import library files (`.a`, `.lib`, `.dll.a`) in `lib/`.
-3. Place any required runtime DLLs in `dll/`.
-
-**You do not need to modify the Makefile to link them.**
-
-The Makefile automatically discovers all `.a` and `.lib` files in `lib/` and links them using `-Wl,--start-group` and `-Wl,--as-needed`:
-- **`-Wl,--start-group ... -Wl,--end-group`**: Prevents link-order errors when static libraries have interdependent references.
-- **`-Wl,--as-needed`**: Links shared libraries and DLL import libraries only if symbols from them are actually referenced by your code.
-
-### System or non-standard libraries
-
-If you need to link system libraries provided by the compiler (e.g. `-lws2_32` for Winsock, `-lm` for math, `-lopengl32`), or libraries installed outside the project, add them to `LDLIBS` in the Makefile:
-
-```makefile
-LDLIBS += -lws2_32
-```
-
-If an external library resides outside `include/` or `lib/`, add custom search paths:
-
-```makefile
-CPPFLAGS += -Ipath/to/headers
-LDFLAGS += -Lpath/to/lib
-```
-
-Any runtime DLLs placed in `dll/` are automatically copied to `build/` alongside the executable when linking.
+| `make` / `make all` | Build project in debug mode (`build/debug/bin/`) |
+| `make release` | Build project in release mode (`build/release/bin/`) |
+| `make run [ARGS="..."]` | Build and execute the program with optional arguments |
+| `make test` | Build and run all unit test suites in `tests/` |
+| `make clean` | Delete the `build/` directory |
+| `make rebuild` | Clean and rebuild the project |
+| `make format` | Format source and header files using `clang-format` |
+| `make format-check` | Check code formatting compliance |
+| `make tidy` | Run static analysis using `clang-tidy` |
+| `make info` | Print detected toolchains, sources, flags, and dependencies |
+| `make help` | Display target and variable help |
 
 ---
 
-# 6. VS Code Build Configuration
+## VS Code Integration
 
-The VS Code tasks are defined in:
+Open the project folder in VS Code (`code .`). The repository includes full editor integration:
 
-```text
-.vscode/tasks.json
-```
-
-The default build shortcut is:
-
-**Ctrl + Shift + B**
-
-It executes the **Build** task, which calls:
-
-```bash
-mingw32-make -j4
-```
-
-The Make executable is located at:
-
-```text
-C:\msys64\ucrt64\bin\mingw32-make.exe
-```
-
-The task adds the UCRT64 and MSYS2 directories to PATH so the compiler and shell utilities can be found.
-
-Additional tasks for **Clean** (`mingw32-make clean`) and **Rebuild** (`mingw32-make rebuild`) are also configured and can be run from the Command Palette via **Terminal > Run Task...**.
+- **IntelliSense & Diagnostics**: Powered by **clangd** and the automatically generated `compile_commands.json`.
+- **Keyboard Shortcuts**:
+  - `Ctrl + Shift + B`: Run default build task.
+  - `F5`: Build and launch with **GDB** debugger.
+  - `Ctrl + F5`: Run without debugging.
+- **Tasks Menu (`Terminal > Run Task...`)**:
+  - `Build` (Debug)
+  - `Build Release`
+  - `Run`
+  - `Test`
+  - `Clean`
+  - `Rebuild`
+  - `Format`
+  - `Tidy`
+- **Interactive Console**: For programs requiring terminal user input (`stdin`), use the **"Debug (external console)"** launch target from the Run & Debug view.
 
 ---
 
-# 7. Running and Debugging
+## License
 
-The debugger configuration is defined in:
-
-```text
-.vscode/launch.json
-```
-
-The executable is:
-
-```text
-build/program.exe
-```
-
-The debugger is:
-
-```text
-C:\msys64\ucrt64\bin\gdb.exe
-```
-
-## Keyboard shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Ctrl + Shift + B` | Build |
-| `Ctrl + F5` | Build and run without debugging |
-| `F5` | Build and start debugging |
-| `F10` | Step over |
-| `F11` | Step into |
-| `Shift + F11` | Step out |
-| `Shift + F5` | Stop debugging |
-
-Both running configurations execute the Build task first, ensuring that the executable is up to date.
-
-Program output is displayed in VS Code's integrated terminal.
-
-## Breakpoints
-
-Click next to a line number to create a breakpoint.
-
-When debugging, you can inspect:
-
-- Local variables.
-- Global variables.
-- The call stack.
-- Watch expressions.
-- Memory.
-
----
-
-# 8. clangd and compile_flags.txt
-
-This project uses **clangd** for:
-
-- Autocomplete.
-- Syntax highlighting.
-- Diagnostics.
-- Code navigation.
-- Go to definition.
-- Find references.
-- Header resolution.
-
-clangd is not the compiler. It independently analyzes your source code using the compilation flags provided in `compile_flags.txt`.
-
-The file is located in the project root:
-
-```text
---target=x86_64-w64-windows-gnu
--std=c99
--Wall
--Wextra
--Wpedantic
--Iinclude
--Isrc
-```
-
-Whenever you add additional include directories or change important compiler flags, update this file accordingly.
-
----
-
-# 9. Code Formatting
-
-The project uses **Clang-Format**.
-
-Formatting rules are stored in:
-
-```text
-.clang-format
-```
-
-VS Code can format code automatically when:
-
-- Pasting code.
-- Typing code.
-- Saving a file.
-
-Manual formatting:
-
-**Shift + Alt + F**
-
-The formatter is provided by the LLVM tooling.
-
----
-
-# 10. Building Manually
-
-Open a UCRT64 terminal in the project directory.
-
-Build:
-
-```bash
-mingw32-make
-```
-
-Build and run:
-
-```bash
-mingw32-make run
-```
-
-Clean:
-
-```bash
-mingw32-make clean
-```
-
-Rebuild:
-
-```bash
-mingw32-make rebuild
-```
-
-Alternatively, use the VS Code shortcuts.
-
----
-
-# 11. Important Notes
-
-### Do not mix toolchains
-
-This project uses UCRT64.
-
-Avoid mixing precompiled libraries, object files, and runtime dependencies from incompatible MSYS2 environments, especially MINGW64 and CLANG64.
-
-### Changing compilers
-
-If you change compiler or important compiler flags, clean the project first:
-
-```bash
-mingw32-make clean
-```
-
-This prevents old object files from being linked with newly compiled files.
-
-### DLL files
-
-DLLs placed in `dll/` are automatically copied into `build/` when linking the executable.
-
-The executable can then find those DLLs alongside itself.
-
-### Adding source files
-
-Simply place additional `.c` files inside `src/`.
-
-Make automatically detects them on the next build.
-
-### Adding headers
-
-Place project headers inside `include/`.
-
-Header dependencies are automatically tracked through generated `.d` files.
-
----
-
-# 12. License
-
-This project is licensed under the MIT License.
-
-See the `LICENSE` file for the complete license text.
-
----
-
-**Toolchain summary**
-
-| Component | Tool |
-|---|---|
-| Compiler | GCC |
-| Linker | GNU ld |
-| Language server | clangd |
-| Formatter | Clang-Format |
-| Build system | GNU Make |
-| Debugger | GDB |
-| Environment | MSYS2 UCRT64 |
-| Editor | Visual Studio Code |
+This template is licensed under the [MIT License](LICENSE).

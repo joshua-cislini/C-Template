@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unix:
+    name: ${{ matrix.os }} / ${{ matrix.cc }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cc: [gcc, clang]
+        exclude:
+          - os: macos-latest
+            cc: gcc # Apple's gcc is clang
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (debug)
+        run: make CC=${{ matrix.cc }} WERROR=1
+      - name: Test (debug)
+        run: make test CC=${{ matrix.cc }} WERROR=1
+      - name: Test with sanitizers
+        if: runner.os == 'Linux'
+        run: make test CC=${{ matrix.cc }} WERROR=1 SANITIZE=address,undefined BUILD_DIR=build-asan
+      - name: Build and test (release)
+        run: make release test CC=${{ matrix.cc }} WERROR=1
+
+  windows:
+    name: windows / msys2-ucrt64
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make
+      - name: Build (debug)
+        run: mingw32-make WERROR=1
+      - name: Test (debug)
+        run: mingw32-make test WERROR=1
+      - name: Build and test (release)
+        run: mingw32-make release test WERROR=1
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: make format-check
