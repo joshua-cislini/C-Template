@@ -10,7 +10,8 @@ The template provides:
 - Clang-Format for automatic code formatting.
 - GNU Make for building and managing the project.
 - GDB for debugging.
-- Automatic DLL copying.
+- Automatic drop-in library discovery and linking (`lib/`).
+- Automatic DLL copying (`dll/`).
 - Multi-file compilation with automatic header dependency tracking.
 
 ---
@@ -37,7 +38,7 @@ MyProject/
 │   └── ...
 │
 ├── lib/
-│   └── (static and import libraries)
+│   └── (static and import libraries: .a, .lib, .dll.a)
 │
 ├── dll/
 │   └── (runtime DLL files)
@@ -63,7 +64,7 @@ MyProject/
 |---|---|
 | `src/` | C source files |
 | `include/` | Project header files |
-| `lib/` | Static and import libraries (`.a`, `.dll.a`) |
+| `lib/` | Static and import libraries (`.a`, `.lib`, `.dll.a`) |
 | `dll/` | Runtime DLL files |
 | `build/` | Compiled executable |
 | `build/obj/` | Object and dependency files |
@@ -216,6 +217,7 @@ It automatically:
 - Compiles source files separately.
 - Tracks header dependencies.
 - Links all object files.
+- Automatically discovers and links all static and import libraries (`.a`, `.lib`, `.dll.a`) in `lib/`.
 - Automatically copies any runtime DLLs from `dll/` into `build/`.
 
 The Makefile uses MSYS2 Bash for its Unix-style commands.
@@ -229,23 +231,27 @@ The Makefile uses MSYS2 Bash for its Unix-style commands.
 | `mingw32-make clean` | Delete build files |
 | `mingw32-make rebuild` | Clean and build again |
 
-## Adding external libraries
+## Adding external libraries (Drop-In)
 
-The Makefile comes pre-configured with include and library search paths (`-Iinclude` and `-Llib`).
+Adding external libraries is completely automated:
 
-To use an external library:
-
-1. Place its headers in `include/` (or a subdirectory of `include/`).
-2. Place its static or import library (`.a` / `.lib`) in `lib/`.
+1. Place library header files in `include/` (or subdirectories of `include/`).
+2. Place static or import library files (`.a`, `.lib`, `.dll.a`) in `lib/`.
 3. Place any required runtime DLLs in `dll/`.
 
-Then add the library to `LDLIBS` in the Makefile:
+**You do not need to modify the Makefile to link them.**
+
+The Makefile automatically discovers all `.a` and `.lib` files in `lib/` and links them using `-Wl,--start-group` and `-Wl,--as-needed`:
+- **`-Wl,--start-group ... -Wl,--end-group`**: Prevents link-order errors when static libraries have interdependent references.
+- **`-Wl,--as-needed`**: Links shared libraries and DLL import libraries only if symbols from them are actually referenced by your code.
+
+### System or non-standard libraries
+
+If you need to link system libraries provided by the compiler (e.g. `-lws2_32` for Winsock, `-lm` for math, `-lopengl32`), or libraries installed outside the project, add them to `LDLIBS` in the Makefile:
 
 ```makefile
-LDLIBS += -lname
+LDLIBS += -lws2_32
 ```
-
-Replace `name` with the actual library name (for example, `libexample.a` becomes `-lexample`).
 
 If an external library resides outside `include/` or `lib/`, add custom search paths:
 

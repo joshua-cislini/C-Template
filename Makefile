@@ -21,6 +21,9 @@ CPPFLAGS := -I$(INC_DIR) -I$(SRC_DIR)
 
 # Linker flags and libraries
 LDFLAGS := -L$(LIB_DIR)
+# Auto-discover static and import libraries in lib/ (.a, .lib, .dll.a)
+AUTO_LIBS := $(sort $(wildcard $(LIB_DIR)/*.a) $(wildcard $(LIB_DIR)/*.lib))
+# Additional system or manual libraries (e.g. -lm, -lws2_32)
 LDLIBS :=
 
 # Source and object files
@@ -38,7 +41,7 @@ all: $(OUTPUT)
 # Link object files
 $(OUTPUT): $(OBJECTS)
 	@mkdir -p "$(BUILD_DIR)"
-	$(CC) $(LDFLAGS) -o "$@" $(OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o "$@" $(OBJECTS) -Wl,--as-needed -Wl,--start-group $(AUTO_LIBS) -Wl,--end-group $(LDLIBS)
 	@if [ -d "$(DLL_DIR)" ]; then \
 		for file in $(DLL_DIR)/*.dll; do \
 			if [ -f "$$file" ]; then \
@@ -49,7 +52,7 @@ $(OUTPUT): $(OBJECTS)
 
 # Compile source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p "$(OBJ_DIR)"
+	@mkdir -p "$(@D)"
 	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c "$<" -o "$@"
 
 # Include automatically generated dependencies
