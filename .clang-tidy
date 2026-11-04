@@ -24,7 +24,7 @@ Checks: >
   -readability-uppercase-literal-suffix,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
 
-# Only report diagnostics for the project's own headers, never dependencies/.
+# Only report diagnostics for the project's headers and sources.
 HeaderFilterRegex: '^.*[/\\](include|src|tests)[/\\].*$'
 
 WarningsAsErrors: ''

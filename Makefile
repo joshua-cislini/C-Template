@@ -1,9 +1,10 @@
 # =============================================================================
-#  Generic C build system
+#  Generic C build system (Makefile)
 # =============================================================================
 #  You normally do NOT need to edit this file:
 #    - project settings live in config.mk
-#    - third-party libraries go into dependencies/ (see dependencies/README.md)
+#    - source files go into src/, headers into include/
+#    - third-party libraries go into lib/, runtime DLLs/shared libs into bin/
 #
 #  Works on Windows (MSYS2 / MinGW-w64, from a POSIX shell OR plain cmd.exe),
 #  Linux and macOS with GNU Make. Run `make help` for the available targets.
@@ -22,12 +23,51 @@ endef
 # Recursive wildcard: $(call rwildcard,<dir>,<pattern>)
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
+# Recursive directory finder: $(call find_dirs,<dir>) returns <dir> and all subdirectories
+find_dirs = $(sort $(patsubst %/,%,$1 $(dir $(wildcard $1/*/) $(call rwildcard,$1,*))))
+
 # Folder name of the project (spaces replaced by underscores).
 PROJECT_DIR_NAME := $(subst ?,_,$(notdir $(subst $(space),?,$(CURDIR))))
 
-# --- Configuration -----------------------------------------------------------
+# --- Configuration (with fallbacks if config.mk is untouched or missing) -----
 
-include config.mk
+-include config.mk
+
+PROJECT             ?= $(PROJECT_DIR_NAME)
+VERSION             ?= 0.1.0
+PROJECT_TYPE        ?= executable
+BUILD               ?= debug
+ifeq ($(origin CC),default)
+CC                  := gcc
+endif
+C_STANDARD          ?= c17
+WARNINGS            ?= -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Wundef \
+                       -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition
+WERROR              ?= 0
+DEBUG_CFLAGS        ?= -g3 -O0 -DDEBUG
+RELEASE_CFLAGS      ?= -O2 -DNDEBUG
+DEBUG_LDFLAGS       ?=
+RELEASE_LDFLAGS     ?= -s
+SANITIZE            ?=
+EXTRA_CPPFLAGS      ?=
+EXTRA_CFLAGS        ?=
+EXTRA_LDFLAGS       ?=
+LDLIBS              ?= -lm
+PKG_CONFIG_PACKAGES ?=
+SRC_DIR             ?= src
+INC_DIR             ?= include
+LIB_DIR             ?= lib
+BIN_DIR             ?= bin
+TEST_DIR            ?= tests
+BUILD_DIR           ?= build
+AUTO_LINK           ?= 1
+AUTO_LINK_EXCLUDE   ?=
+MAIN_SRC            ?= $(SRC_DIR)/main.c
+COMPILE_COMMANDS    ?= 1
+CLANG_FORMAT        ?= clang-format
+CLANG_TIDY          ?= clang-tidy
+PKG_CONFIG          ?= pkg-config
+ARGS                ?=
 
 .DEFAULT_GOAL := all
 
@@ -124,9 +164,9 @@ else
   $(error BUILD must be 'debug' or 'release', got '$(BUILD)')
 endif
 
-OUT_DIR := $(BUILD_DIR)/$(BUILD)
-OBJ_DIR := $(OUT_DIR)/obj
-BIN_DIR := $(OUT_DIR)/bin
+OUT_DIR     := $(BUILD_DIR)/$(BUILD)
+OBJ_DIR     := $(OUT_DIR)/obj
+OUT_BIN_DIR := $(OUT_DIR)/bin
 
 # --- Platform specifics ------------------------------------------------------
 
@@ -171,36 +211,35 @@ ALL_OBJECTS          := $(call to_obj,$(ALL_SOURCES))
 
 FORMAT_FILES := $(sort $(foreach d,$(SRC_DIR) $(INC_DIR) $(TEST_DIR),$(call rwildcard,$d,*.c) $(call rwildcard,$d,*.h)))
 
-# --- Dependencies (drag-and-drop) --------------------------------------------
-#  dependencies/{include,lib,bin}            loose files
-#  dependencies/<package>/{include,lib,bin}  one folder per library
+# --- Recursive Include, Library, and Runtime Discovery -----------------------
+#  - include/ and src/ (plus all nested subdirectories) are added to include paths
+#  - lib/ (plus all nested subdirectories) are scanned for static/import libraries
+#  - bin/ and lib/ (plus all nested subdirectories) are scanned for runtime DLLs/.so/.dylib
 
-DEP_ROOTS    := $(DEPENDENCIES_DIR) $(patsubst %/,%,$(wildcard $(DEPENDENCIES_DIR)/*/))
-dep_subdirs   = $(patsubst %/,%,$(wildcard $(addsuffix /$1/,$(DEP_ROOTS))))
-DEP_INC_DIRS := $(call dep_subdirs,include)
-DEP_LIB_DIRS := $(call dep_subdirs,lib)
-DEP_BIN_DIRS := $(call dep_subdirs,bin)
+ALL_INC_DIRS := $(call find_dirs,$(INC_DIR)) $(call find_dirs,$(SRC_DIR))
+ALL_LIB_DIRS := $(filter-out %/cmake %/pkgconfig,$(call find_dirs,$(LIB_DIR)))
+ALL_BIN_DIRS := $(call find_dirs,$(BIN_DIR))
 
-DEP_LIB_FILES := $(foreach d,$(DEP_LIB_DIRS),$(wildcard $(addprefix $d/,$(LINK_LIB_GLOB))))
+LIB_FILES := $(sort $(foreach p,$(LINK_LIB_GLOB),$(call rwildcard,$(LIB_DIR),$p)))
 # When a library exists both as shared/import and static, prefer the shared one
 # (static libraries often need extra system libraries to link).
-DEP_LIB_FILES := $(filter-out $(patsubst %.dll.a,%.a,$(filter %.dll.a,$(DEP_LIB_FILES))) \
-                              $(patsubst %.so,%.a,$(filter %.so,$(DEP_LIB_FILES))) \
-                              $(patsubst %.dylib,%.a,$(filter %.dylib,$(DEP_LIB_FILES))),$(DEP_LIB_FILES))
-DEP_LIB_FILES := $(filter-out $(addprefix %/,$(AUTO_LINK_EXCLUDE)),$(DEP_LIB_FILES))
+LIB_FILES := $(filter-out $(patsubst %.dll.a,%.a,$(filter %.dll.a,$(LIB_FILES))) \
+                          $(patsubst %.so,%.a,$(filter %.so,$(LIB_FILES))) \
+                          $(patsubst %.dylib,%.a,$(filter %.dylib,$(LIB_FILES))),$(LIB_FILES))
+LIB_FILES := $(filter-out $(addprefix %/,$(AUTO_LINK_EXCLUDE)) $(AUTO_LINK_EXCLUDE),$(LIB_FILES))
 
 ifeq ($(AUTO_LINK),1)
   ifeq ($(PLATFORM),linux)
     # -l:<file> records the bare file name in the executable (not the path).
-    AUTO_LIBS := $(addprefix -l:,$(notdir $(DEP_LIB_FILES)))
+    AUTO_LIBS := $(addprefix -l:,$(notdir $(LIB_FILES)))
   else
-    AUTO_LIBS := $(DEP_LIB_FILES)
+    AUTO_LIBS := $(LIB_FILES)
   endif
 endif
 
-# Runtime files (DLLs / shared objects) copied next to the binaries.
-RUNTIME_FILES  := $(sort $(foreach d,$(DEP_BIN_DIRS) $(DEP_LIB_DIRS),$(wildcard $(addprefix $d/,$(RUNTIME_GLOB)))))
-RUNTIME_COPIES := $(sort $(addprefix $(BIN_DIR)/,$(notdir $(RUNTIME_FILES))))
+# Runtime files (DLLs / shared objects) in bin/ or lib/ copied next to the binaries.
+RUNTIME_FILES  := $(sort $(foreach d,$(BIN_DIR) $(LIB_DIR),$(foreach p,$(RUNTIME_GLOB),$(call rwildcard,$d,$p))))
+RUNTIME_COPIES := $(sort $(addprefix $(OUT_BIN_DIR)/,$(notdir $(RUNTIME_FILES))))
 
 # --- pkg-config --------------------------------------------------------------
 
@@ -219,12 +258,12 @@ endif
 
 SANITIZE_FLAGS := $(if $(strip $(SANITIZE)),-fsanitize=$(SANITIZE) -fno-omit-frame-pointer)
 
-ALL_CPPFLAGS := -I$(INC_DIR) -I$(SRC_DIR) $(addprefix -isystem ,$(DEP_INC_DIRS)) \
+ALL_CPPFLAGS := $(addprefix -I,$(ALL_INC_DIRS)) \
                 -DPROJECT_NAME=\"$(PROJECT)\" -DPROJECT_VERSION=\"$(VERSION)\" \
                 $(PKG_CFLAGS) $(EXTRA_CPPFLAGS) $(CPPFLAGS)
 ALL_CFLAGS   := -std=$(C_STANDARD) $(WARNINGS) $(if $(filter 1,$(WERROR)),-Werror) \
                 $(MODE_CFLAGS) $(SANITIZE_FLAGS) $(PIC_FLAGS) $(EXTRA_CFLAGS) $(CFLAGS)
-ALL_LDFLAGS  := $(MODE_LDFLAGS) $(SANITIZE_FLAGS) $(addprefix -L,$(DEP_LIB_DIRS)) \
+ALL_LDFLAGS  := $(MODE_LDFLAGS) $(SANITIZE_FLAGS) $(addprefix -L,$(ALL_LIB_DIRS)) \
                 $(RPATH) $(EXTRA_LDFLAGS) $(LDFLAGS)
 ALL_LDLIBS   := $(if $(LINK_GROUP),-Wl$(comma)--as-needed) \
                 $(if $(AUTO_LIBS),$(if $(LINK_GROUP),-Wl$(comma)--start-group) $(AUTO_LIBS) $(if $(LINK_GROUP),-Wl$(comma)--end-group)) \
@@ -232,26 +271,26 @@ ALL_LDLIBS   := $(if $(LINK_GROUP),-Wl$(comma)--as-needed) \
 DEPFLAGS     := -MMD -MP
 
 # Rebuild everything when the build configuration changes.
-BUILD_FILES := Makefile config.mk
+BUILD_FILES := Makefile $(wildcard config.mk)
 
 # --- Outputs -----------------------------------------------------------------
 
 ifeq ($(PROJECT_TYPE),executable)
-  TARGET := $(BIN_DIR)/$(PROJECT)$(EXE)
+  TARGET := $(OUT_BIN_DIR)/$(PROJECT)$(EXE)
 else ifeq ($(PROJECT_TYPE),static)
-  TARGET := $(BIN_DIR)/lib$(PROJECT).a
+  TARGET := $(OUT_BIN_DIR)/lib$(PROJECT).a
 else ifeq ($(PROJECT_TYPE),shared)
-  TARGET := $(BIN_DIR)/$(SHARED_NAME)
+  TARGET := $(OUT_BIN_DIR)/$(SHARED_NAME)
 else
   $(error PROJECT_TYPE must be 'executable', 'static' or 'shared', got '$(PROJECT_TYPE)')
 endif
 
 TEST_NAMES := $(basename $(notdir $(TEST_MAINS)))
-TEST_BINS  := $(addprefix $(BIN_DIR)/,$(addsuffix $(EXE),$(TEST_NAMES)))
+TEST_BINS  := $(addprefix $(OUT_BIN_DIR)/,$(addsuffix $(EXE),$(TEST_NAMES)))
 TEST_RUNS  := $(addprefix run-,$(TEST_NAMES))
 
 # Every directory that must exist.
-ALL_DIRS := $(sort $(BIN_DIR) $(patsubst %/,%,$(dir $(ALL_OBJECTS))))
+ALL_DIRS := $(sort $(OUT_BIN_DIR) $(patsubst %/,%,$(dir $(ALL_OBJECTS))))
 
 # --- compile_commands.json (clangd, clang-tidy) ------------------------------
 #  Rewritten whenever the list of sources or the flags change.
@@ -301,13 +340,13 @@ $(OBJ_DIR)/%.o: %.c $(BUILD_FILES) | $$(@D)
 # --- Link --------------------------------------------------------------------
 
 ifeq ($(PROJECT_TYPE),executable)
-$(TARGET): $(OBJECTS) | $(BIN_DIR)
+$(TARGET): $(OBJECTS) $(LIB_FILES) | $(OUT_BIN_DIR)
 	$(call LOG,LINK,$@)
 	$(Q)$(CC) $(ALL_LDFLAGS) $(OBJECTS) $(ALL_LDLIBS) -o $@
 endif
 
 ifeq ($(PROJECT_TYPE),static)
-$(TARGET): $(LIB_OBJECTS) | $(BIN_DIR)
+$(TARGET): $(LIB_OBJECTS) | $(OUT_BIN_DIR)
 	$(call LOG,AR,$@)
 	$(Q)$(call RMFILE,$@)
 	$(Q)$(AR) rcs $@ $(LIB_OBJECTS)
@@ -315,26 +354,26 @@ endif
 
 ifeq ($(PROJECT_TYPE),shared)
   ifeq ($(PLATFORM),windows)
-    SHARED_LDFLAGS := -shared -Wl,--out-implib,$(BIN_DIR)/lib$(PROJECT).dll.a
+    SHARED_LDFLAGS := -shared -Wl,--out-implib,$(OUT_BIN_DIR)/lib$(PROJECT).dll.a
   else ifeq ($(PLATFORM),macos)
     SHARED_LDFLAGS := -dynamiclib -install_name @rpath/$(SHARED_NAME)
   else
     SHARED_LDFLAGS := -shared -Wl,-soname,$(SHARED_NAME)
   endif
-$(TARGET): $(LIB_OBJECTS) | $(BIN_DIR)
+$(TARGET): $(LIB_OBJECTS) $(LIB_FILES) | $(OUT_BIN_DIR)
 	$(call LOG,LINK,$@)
 	$(Q)$(CC) $(SHARED_LDFLAGS) $(ALL_LDFLAGS) $(LIB_OBJECTS) $(ALL_LDLIBS) -o $@
 endif
 
 # Test executables: tests/test_<name>.c + tests/ helpers + project code (minus main).
-$(BIN_DIR)/test_%$(EXE): $(OBJ_DIR)/$(TEST_DIR)/test_%.o $(TEST_SUPPORT_OBJECTS) $(LIB_OBJECTS) | $(BIN_DIR)
+$(OUT_BIN_DIR)/test_%$(EXE): $(OBJ_DIR)/$(TEST_DIR)/test_%.o $(TEST_SUPPORT_OBJECTS) $(LIB_OBJECTS) $(LIB_FILES) | $(OUT_BIN_DIR)
 	$(call LOG,LINK,$@)
-	$(Q)$(CC) $(ALL_LDFLAGS) $^ $(ALL_LDLIBS) -o $@
+	$(Q)$(CC) $(ALL_LDFLAGS) $(filter %.o,$^) $(ALL_LDLIBS) -o $@
 
 # --- Runtime files -----------------------------------------------------------
 
 define COPY_RULE
-$(BIN_DIR)/$(notdir $1): $1 | $(BIN_DIR)
+$(OUT_BIN_DIR)/$(notdir $1): $1 | $(OUT_BIN_DIR)
 	$$(call LOG,COPY,$$@)
 	$(Q)$$(call COPY,$$<,$$@)
 endef
@@ -364,7 +403,7 @@ else
 	@echo All tests passed: $(TEST_NAMES)
 endif
 
-$(TEST_RUNS): run-%: $(BIN_DIR)/%$(EXE) $(RUNTIME_COPIES)
+$(TEST_RUNS): run-%: $(OUT_BIN_DIR)/%$(EXE) $(RUNTIME_COPIES)
 	$(call LOG,TEST,$*)
 	$(Q)$(call RUN,$<)
 
@@ -394,8 +433,8 @@ info:
 	$(info Output         : $(TARGET))
 	$(info Sources        : $(SOURCES))
 	$(info Tests          : $(TEST_NAMES))
-	$(info Dep. includes  : $(DEP_INC_DIRS))
-	$(info Dep. lib dirs  : $(DEP_LIB_DIRS))
+	$(info Include dirs   : $(ALL_INC_DIRS))
+	$(info Library dirs   : $(ALL_LIB_DIRS))
 	$(info Auto-linked    : $(AUTO_LIBS))
 	$(info Runtime files  : $(RUNTIME_FILES))
 	$(info pkg-config     : $(PKG_CONFIG_PACKAGES))
@@ -419,10 +458,10 @@ help:
 	$(info $(space) format         Format the sources with clang-format)
 	$(info $(space) format-check   Fail if a source file is not formatted)
 	$(info $(space) tidy           Run clang-tidy static analysis)
-	$(info $(space) info           Show the detected configuration and dependencies)
+	$(info $(space) info           Show the detected configuration and libraries)
 	$(info )
 	$(info Variables:)
 	$(info $(space) BUILD=debug|release   V=1 (verbose)   WERROR=1   SANITIZE=address,undefined)
 	$(info )
-	$(info Project settings live in config.mk; libraries go into $(DEPENDENCIES_DIR)/.)
+	$(info Project settings live in config.mk; drop headers in $(INC_DIR)/, libs in $(LIB_DIR)/, DLLs in $(BIN_DIR)/.)
 	@cd .

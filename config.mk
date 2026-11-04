@@ -1,5 +1,5 @@
 # =============================================================================
-#  Project configuration
+#  Project configuration (config.mk)
 # =============================================================================
 #  This is the ONLY build file you normally need to touch. The Makefile next to
 #  it contains the generic build machinery and reads every setting below.
@@ -12,7 +12,7 @@
 
 # Name of the produced binary. Defaults to the name of the project folder, so
 # renaming the folder renames the program (and VS Code's launch.json follows
-# automatically). Set it explicitly if your folder name contains spaces.
+# automatically). Spaces in the folder name are converted to underscores.
 PROJECT ?= $(PROJECT_DIR_NAME)
 
 # Exposed to the code as the PROJECT_VERSION string macro.
@@ -68,32 +68,37 @@ EXTRA_CFLAGS ?=
 # Linker flags, e.g. -mwindows (GUI app without a console on Windows)
 EXTRA_LDFLAGS ?=
 
-# Libraries that are NOT dropped into dependencies/: system libraries provided
-# by the toolchain. Examples: -lws2_32 -lgdi32 -lopengl32 (Windows),
-# -lpthread -ldl (Linux). -lm is linked by default for <math.h>.
+# System libraries provided by the toolchain (NOT dropped into lib/).
+# Examples: -lws2_32 -lgdi32 -lopengl32 (Windows), -lpthread -ldl (Linux).
+# -lm is linked by default for <math.h>.
 LDLIBS ?= -lm
 
 # pkg-config packages to compile and link against (e.g. sdl2 gtk4 libcurl).
 # Handy on Linux, macOS (Homebrew) and MSYS2 (pacman-installed libraries).
 PKG_CONFIG_PACKAGES ?=
 
-# --- Dependencies (drag-and-drop folder) -------------------------------------
+# --- Drop-in libraries & layout ----------------------------------------------
 
-# See dependencies/README.md. Libraries found in the lib/ folders are linked
-# automatically when AUTO_LINK is 1. Set it to 0 to list them yourself in LDLIBS.
-DEPENDENCIES_DIR ?= dependencies
-AUTO_LINK ?= 1
-
-# File names (patterns allowed) in dependencies/**/lib that must NOT be linked
-# automatically, e.g. libSDL2_test.a or %_static.lib
-AUTO_LINK_EXCLUDE ?=
-
-# --- Layout ------------------------------------------------------------------
-
+# Project directories (all scanned recursively by the Makefile):
+#   src/     -> C source files (.c) and internal headers (.h)
+#   include/ -> Project & third-party header files (.h)
+#   lib/     -> Third-party static & import libraries (.a, .lib, .dll.a, .so, .dylib)
+#   bin/     -> Third-party runtime shared libraries (.dll, .so, .dylib) copied to build/<mode>/bin/
+#   tests/   -> Unit tests (test_*.c)
 SRC_DIR   ?= src
 INC_DIR   ?= include
+LIB_DIR   ?= lib
+BIN_DIR   ?= bin
 TEST_DIR  ?= tests
 BUILD_DIR ?= build
+
+# Libraries found in lib/ are linked automatically when AUTO_LINK is 1.
+# Set to 0 to list them manually in LDLIBS.
+AUTO_LINK ?= 1
+
+# File names (patterns allowed) in lib/ that must NOT be linked automatically,
+# e.g. libSDL2_test.a or %_static.lib
+AUTO_LINK_EXCLUDE ?=
 
 # The source file holding main(). It is left out when linking the test
 # executables (each test has its own main()) and for library projects.

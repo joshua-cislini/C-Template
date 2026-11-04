@@ -5,7 +5,7 @@
 *.bat  text eol=crlf
 *.cmd  text eol=crlf
 
-# Binary files that may be dropped into dependencies/.
+# Binary files that may be dropped into lib/ or bin/.
 *.a      binary
 *.lib    binary
 *.dll    binary
