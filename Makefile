@@ -10,6 +10,8 @@ TARGET := program
 
 SRC_DIR := src
 INC_DIR := include
+LIB_DIR := lib
+DLL_DIR := dll
 BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
 
@@ -18,7 +20,7 @@ CFLAGS := -std=c99 -Wall -Wextra -Wpedantic -g -O0
 CPPFLAGS := -I$(INC_DIR) -I$(SRC_DIR)
 
 # Linker flags and libraries
-LDFLAGS :=
+LDFLAGS := -L$(LIB_DIR)
 LDLIBS :=
 
 # Source and object files
@@ -37,11 +39,11 @@ all: $(OUTPUT)
 $(OUTPUT): $(OBJECTS)
 	@mkdir -p "$(BUILD_DIR)"
 	$(CC) $(LDFLAGS) -o "$@" $(OBJECTS) $(LDLIBS)
-
-	# Copy DLL files if the dll directory exists
-	@if [ -d "dll" ]; then \
-		for file in dll/*.dll; do \
-			[ -f "$$file" ] && cp -f "$$file" "$(BUILD_DIR)/"; \
+	@if [ -d "$(DLL_DIR)" ]; then \
+		for file in $(DLL_DIR)/*.dll; do \
+			if [ -f "$$file" ]; then \
+				cp -f "$$file" "$(BUILD_DIR)/"; \
+			fi; \
 		done; \
 	fi
 

@@ -20,10 +20,12 @@ The template provides:
 ```text
 MyProject/
 │
+├── .clang-format
+├── .gitignore
+├── compile_flags.txt
+├── LICENSE
 ├── Makefile
 ├── README.md
-├── compile_flags.txt
-├── .clang-format
 │
 ├── src/
 │   ├── main.c
@@ -181,8 +183,9 @@ Install these extensions:
 |---|---|---|
 | clangd | `llvm-vs-code-extensions.vscode-clangd` | IntelliSense and language support |
 | C/C++ | `ms-vscode.cpptools` | GDB debugging integration |
+| Makefile Tools | `ms-vscode.makefile-tools` | Makefile syntax and target integration |
 
-The C/C++ extension is used for debugging. clangd remains responsible for code intelligence.
+When you open this project folder in VS Code, you will be prompted automatically to install these extensions (configured in `.vscode/extensions.json`). The C/C++ extension is used for debugging. clangd remains responsible for code intelligence.
 
 ---
 
@@ -213,7 +216,7 @@ It automatically:
 - Compiles source files separately.
 - Tracks header dependencies.
 - Links all object files.
-- Copies DLL files from `dll/` into `build/`.
+- Automatically copies any runtime DLLs from `dll/` into `build/`.
 
 The Makefile uses MSYS2 Bash for its Unix-style commands.
 
@@ -228,29 +231,30 @@ The Makefile uses MSYS2 Bash for its Unix-style commands.
 
 ## Adding external libraries
 
+The Makefile comes pre-configured with include and library search paths (`-Iinclude` and `-Llib`).
+
 To use an external library:
 
-1. Place its headers in `include/` or another appropriate directory.
-2. Place its static or import library in `lib/`.
-3. Place required runtime DLLs in `dll/`.
+1. Place its headers in `include/` (or a subdirectory of `include/`).
+2. Place its static or import library (`.a` / `.lib`) in `lib/`.
+3. Place any required runtime DLLs in `dll/`.
 
-Then configure the Makefile:
+Then add the library to `LDLIBS` in the Makefile:
 
 ```makefile
-CPPFLAGS += -Iinclude
-LDFLAGS += -Llib
 LDLIBS += -lname
 ```
 
-Replace `name` with the actual library name.
+Replace `name` with the actual library name (for example, `libexample.a` becomes `-lexample`).
 
-For example, a library named `example` would generally use:
+If an external library resides outside `include/` or `lib/`, add custom search paths:
 
 ```makefile
-LDLIBS += -lexample
+CPPFLAGS += -Ipath/to/headers
+LDFLAGS += -Lpath/to/lib
 ```
 
-Its runtime DLL, if required, should be placed in `dll/`.
+Any runtime DLLs placed in `dll/` are automatically copied to `build/` alongside the executable when linking.
 
 ---
 
@@ -266,7 +270,7 @@ The default build shortcut is:
 
 **Ctrl + Shift + B**
 
-It executes the Build task, which calls:
+It executes the **Build** task, which calls:
 
 ```bash
 mingw32-make -j4
@@ -279,6 +283,8 @@ C:\msys64\ucrt64\bin\mingw32-make.exe
 ```
 
 The task adds the UCRT64 and MSYS2 directories to PATH so the compiler and shell utilities can be found.
+
+Additional tasks for **Clean** (`mingw32-make clean`) and **Rebuild** (`mingw32-make rebuild`) are also configured and can be run from the Command Palette via **Terminal > Run Task...**.
 
 ---
 
@@ -346,9 +352,7 @@ This project uses **clangd** for:
 
 clangd is not the compiler. It independently analyzes your source code using the compilation flags provided in `compile_flags.txt`.
 
-The file is located in the project root.
-
-Example:
+The file is located in the project root:
 
 ```text
 --target=x86_64-w64-windows-gnu

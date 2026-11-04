@@ -1,0 +1,55 @@
+# =============================================================================
+# Build and Output Files
+# =============================================================================
+# Build output directory (executable, object files, dependency files, copied DLLs)
+build/
+bin/
+out/
+
+# Intermediate compilation files and executables outside build/
+*.o
+*.obj
+*.d
+*.exe
+
+# =============================================================================
+# Language Server and Tooling
+# =============================================================================
+# clangd index cache and compilation databases
+.clangd/
+compile_commands.json
+
+# =============================================================================
+# Visual Studio Code
+# =============================================================================
+# VS Code user/workspace temporary files
+# (Project configs: settings.json, tasks.json, launch.json, extensions.json are preserved)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.vscode/.browse.c_cpp.db*
+
+# =============================================================================
+# Operating System & Editor Files
+# =============================================================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor backups and swap files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.temp
+*.log
