@@ -139,7 +139,7 @@ endif
 ifeq ($(MAKE_4),1)
   ifeq ($(filter -j%,$(MAKEFLAGS)),)
     ifeq ($(OS),Windows_NT)
-      JOBS ?= $(NUMBER_OF_PROCESSORS)
+      JOBS ?= $(if $(NUMBER_OF_PROCESSORS),$(NUMBER_OF_PROCESSORS),4)
     else
       JOBS ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
     endif
@@ -306,7 +306,7 @@ ifeq ($(COMPILE_COMMANDS)$(MAKE_4),11)
   CC_PATH := $(if $(CC_PATH),$(CC_PATH),$(CC))
 
   json_escape  = $(subst ",\",$(subst \,\\,$1))
-  compdb_entry = {$(newline)  "directory": "$(CURDIR)",$(newline)  "file": "$1",$(newline)  "command": "$(call json_escape,$(strip $(CC_PATH) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -c $1 -o $(call to_obj,$1)))"$(newline)}
+  compdb_entry = {$(newline)  "directory": "$(subst \,/,$(CURDIR))",$(newline)  "file": "$1",$(newline)  "command": "$(call json_escape,$(strip $(CC_PATH) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -c $1 -o $(call to_obj,$1)))"$(newline)}
   COMPDB_JSON := [$(newline)$(subst }$(space){,}$(comma)$(newline){,$(foreach s,$(ALL_SOURCES),$(call compdb_entry,$s)))$(newline)]
 
   ifneq ($(COMPDB_JSON),$(file <compile_commands.json))

@@ -74,7 +74,7 @@ Pressing **F5** automatically runs the `Build` task and attaches the debugger to
    - Primary debug target.
    - Runs within the VS Code integrated Debug Console.
    - Enables GDB pretty-printing (`-enable-pretty-printing`) for inspecting complex structs, strings, and arrays.
-   - On macOS, automatically selects `lldb`. On Windows, targets `C:/msys64/ucrt64/bin/gdb.exe`.
+   - On macOS, automatically selects `lldb`. On Windows, targets `C:\msys64\ucrt64\bin\gdb.exe`.
 2. **`Debug (external console)`**:
    - Launches your program in a standalone terminal window (`externalConsole: true`).
    - **Essential for programs reading user input (`stdin`)**: VS Code's integrated debug console cannot forward keyboard input to programs using `scanf`, `getchar`, or `fgets` on Windows. Use this configuration whenever debugging interactive CLI applications.

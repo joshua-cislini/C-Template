@@ -22,8 +22,8 @@
 				}
 			],
 			"windows": {
-				"program": "${workspaceFolder}/build/debug/bin/${workspaceFolderBasename}.exe",
-				"miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
+				"program": "${workspaceFolder}\\build\\debug\\bin\\${workspaceFolderBasename}.exe",
+				"miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe",
 				"environment": [
 					{
 						"name": "PATH",
@@ -56,8 +56,8 @@
 				}
 			],
 			"windows": {
-				"program": "${workspaceFolder}/build/debug/bin/${workspaceFolderBasename}.exe",
-				"miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
+				"program": "${workspaceFolder}\\build\\debug\\bin\\${workspaceFolderBasename}.exe",
+				"miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe",
 				"environment": [
 					{
 						"name": "PATH",
