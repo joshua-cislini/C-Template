@@ -53,8 +53,7 @@ $RECYCLE.BIN/
 # =============================================================================
 # Optional: do not commit third-party binaries
 # =============================================================================
-# Uncomment to keep lib/ and bin/ out of version control (teammates then have
-# to download the libraries themselves):
+# Uncomment to keep lib/ and bin/ out of version control (teammates then have to download the libraries themselves):
 # lib/*
 # !lib/README.md
 # bin/*

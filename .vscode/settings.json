@@ -9,22 +9,12 @@
 		"--header-insertion=never",
 		"--query-driver=**/*gcc*,**/*clang*,**/cc*"
 	],
-
 	"[c]": {
 		"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
 		"editor.formatOnSave": true
 	},
-	"files.associations": {
-		"*.h": "c",
-		"*.mk": "makefile"
-	},
-
 	"files.exclude": {
 		"**/.cache": true
 	},
-	"search.exclude": {
-		"build": true,
-		"lib": true,
-		"bin": true
-	}
+	"explorer.sortOrder": "type"
 }

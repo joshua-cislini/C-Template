@@ -17,48 +17,96 @@
 			"detail": "Debug build (make)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
+			"windows": {
+				"command": "mingw32-make"
+			},
 			"args": [],
-			"group": { "kind": "build", "isDefault": true },
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative", "${workspaceFolder}"] }
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}"
+				]
+			}
 		},
 		{
 			"label": "Build Release",
 			"detail": "Optimized build (make release)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["release"],
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"release"
+			],
 			"group": "build",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative", "${workspaceFolder}"] }
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}"
+				]
+			}
 		},
 		{
 			"label": "Run",
 			"detail": "Build and run (make run)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["run"],
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"run"
+			],
 			"group": "build",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative", "${workspaceFolder}"] }
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}"
+				]
+			}
 		},
 		{
 			"label": "Test",
 			"detail": "Build and run the unit tests (make test)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["test"],
-			"group": { "kind": "test", "isDefault": true },
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative", "${workspaceFolder}"] }
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"test"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}"
+				]
+			}
 		},
 		{
 			"label": "Clean",
 			"detail": "Delete the build directory (make clean)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["clean"],
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"clean"
+			],
 			"problemMatcher": []
 		},
 		{
@@ -66,18 +114,32 @@
 			"detail": "Clean and build (make rebuild)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["rebuild"],
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"rebuild"
+			],
 			"group": "build",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative", "${workspaceFolder}"] }
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}"
+				]
+			}
 		},
 		{
 			"label": "Format",
 			"detail": "Format all sources (make format)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["format"],
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"format"
+			],
 			"problemMatcher": []
 		},
 		{
@@ -85,9 +147,19 @@
 			"detail": "Static analysis with clang-tidy (make tidy)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["tidy"],
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative", "${workspaceFolder}"] }
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"tidy"
+			],
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}"
+				]
+			}
 		},
 		{
 			// Generates compile_commands.json for clangd as soon as the folder is
@@ -96,10 +168,20 @@
 			"detail": "Generate compile_commands.json for clangd (make info)",
 			"type": "process",
 			"command": "make",
-			"windows": { "command": "mingw32-make" },
-			"args": ["--silent", "info"],
-			"runOptions": { "runOn": "folderOpen" },
-			"presentation": { "reveal": "never", "close": true },
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"--silent",
+				"info"
+			],
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
+			"presentation": {
+				"reveal": "never",
+				"close": true
+			},
 			"problemMatcher": []
 		}
 	]
