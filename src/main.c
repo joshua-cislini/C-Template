@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	char message[128];
-	const char *name = (argc > 1) ? argv[1] : NULL;
+	const char *name = (argc > 1) ? argv[1] : nullptr;
 
 	if(greeting_format(message, sizeof message, name) < 0) {
 		fprintf(stderr, "error: could not format the greeting\n");

@@ -26,7 +26,6 @@
 #define TEST_FRAMEWORK_H
 
 #include <stdio.h>
-#include <string.h>
 
 static int tf_checks_run;
 static int tf_checks_failed;

@@ -39,7 +39,7 @@ endif
 # --- Language and warnings ---------------------------------------------------
 
 # C standard: c99, c11, c17, c23, gnu17, ...
-C_STANDARD ?= c17
+C_STANDARD ?= c23
 
 WARNINGS ?= -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Wundef \
             -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition
