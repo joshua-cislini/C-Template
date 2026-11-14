@@ -1,339 +1,518 @@
 # =============================================================================
-# .clang-format — every option, with a one-line explanation and its default
-# value under the built-in "LLVM" base style (clang-format 18).
+# Ultimate .clang-format — every option (clang-format 22.1.8), grouped by
+# category with descriptions, valid values, and C-Template overrides on an
+# LLVM baseline.
+# Generated for: clang-format version 22.1.8 (https://github.com/msys2/MINGW-packages d34feaaa1d0aff624c870910b6f2589aa40d20de)
 #
 # HOW TO USE
-#   - Save this file as ".clang-format" (or "_clang-format" on Windows) in
-#     your project root. clang-format finds it automatically.
+#   - Save this file as '.clang-format' (or '_clang-format' on Windows) in
+#     your project root. clang-format discovers it automatically.
 #   - Edit any value below to change that rule; delete a line to fall back
 #     to BasedOnStyle's default for it.
 #   - Start from a different base by changing BasedOnStyle to one of:
-#     LLVM, Google, Chromium, Mozilla, WebKit, Microsoft, GNU.
+#     LLVM, GNU, Google, Chromium, Microsoft, Mozilla, WebKit,
+#     InheritParentConfig, None.
 #   - Docs: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 #
-# A handful of options added in clang-format 19-23 (e.g. BreakBinaryOperations,
-# AllowShortNamespacesOnASingleLine, the BreakAfterOpenBracket* family,
-# BreakBeforeReturnType, EnumTrailingComma) aren't in this v18 dump; they're
-# listed, commented out, at the very end so you can add them if your
-# clang-format is new enough.
+# NOTES
+#   - QualifierOrder is commented out because clang-format rejects it unless
+#     QualifierAlignment is set to Custom.
+#   - Deprecated *MinDigits aliases under IntegerLiteralSeparator are
+#     commented out so they do not override *MinDigitsInsert.
+#   - InsertTrailingCommas: Wrapped requires BinPackArguments: false and
+#     BinPackParameters: OnePerLine or AlwaysOnePerLine.
 # =============================================================================
-
-BasedOnStyle: LLVM
+---
 
 # --- General -----------------------------------------------------------------
 
-# Language this section applies to (Cpp, Java, JavaScript, Json, ObjC, Proto,
-# TableGen, TextProto, Verilog, CSharp). Only needed in multi-section files.
-Language: Cpp
+# Predefined base style whose defaults this config overrides (LLVM | GNU | Google | Chromium | Microsoft | Mozilla | WebKit | InheritParentConfig | None).
+BasedOnStyle:    LLVM
 
-# Extra indent/outdent of access modifiers (public:/private:) relative to
-# the class body.
-AccessModifierOffset: -2
+# Target language for this configuration block (C | Cpp | CSharp | Java | JavaScript | Json | ObjC | Proto | TableGen | TextProto | Verilog).
+# Note: Setting Language: Cpp limits this section to C/C++/ObjC; omit Language or add extra '---' sections for other languages.
+Language:        Cpp
 
-# Indentation width, in columns.
-IndentWidth: 4
+# C++ language standard to parse and format for (c++03 | c++11 | c++14 | c++17 | c++20 | Latest | Auto; Cpp03/Cpp11 are deprecated aliases).
+Standard:        Latest
 
-# The column after which lines are wrapped. 0 = no limit.
-ColumnLimit: 0
+# Number of columns per indentation level (unsigned).
+# (LLVM default: 2).
+IndentWidth:     4
 
-# Indent width used for continuation lines (wrapped expressions).
+# Maximum line length in columns; 0 disables line wrapping at a column limit (unsigned).
+# (LLVM default: 80).
+ColumnLimit:     160
+
+# Indentation width for line continuations (unsigned).
+# (LLVM default: 4).
 ContinuationIndentWidth: 8
 
-# Use tab characters for indentation instead of spaces (Never, ForIndentation,
-# ForContinuationAndIndentation, AlignWithSpaces, Always).
-UseTab: Always
+# How tab characters are used for indentation and alignment (Never | ForIndentation | ForContinuationAndIndentation | AlignWithSpaces | Always).
+# (LLVM default: Never).
+UseTab:          Always
 
-# Width a tab character is displayed as.
-TabWidth: 4
+# Number of columns per tab stop (unsigned).
+# (LLVM default: 8).
+TabWidth:        4
 
-# Disables formatting entirely for files matched by this style (useful in a
-# language section you want clang-format to skip).
-DisableFormat: false
+# Disable formatting completely (bool: true | false).
+DisableFormat:   false
 
-# Line ending to use (LF, CRLF, DeriveLF, DeriveCRLF).
-LineEnding: DeriveLF
+# Line ending style to emit (LF | CRLF | DeriveLF | DeriveCRLF).
+LineEnding:      DeriveLF
 
-# --- Alignment -----------------------------------------------------------------
+# Regex matching comment markers that disable formatting for the next single line (string regex).
+OneLineFormatOffRegex: ''
 
-# Horizontally align arguments after an open bracket (parens/angle/square).
-AlignAfterOpenBracket: Align
 
-# Align columns of an array-of-structs initializer (None, Left, Right).
+# --- Alignment ---------------------------------------------------------------
+
+# Extra indent or outdent applied to access modifiers such as 'public:', relative to IndentWidth (int).
+AccessModifierOffset: -2
+
+# Horizontally align arguments after an opening bracket '(', '<', or '[' (bool: true | false; changed from enum to bool in clang-format 22).
+# Replaces v18 enum values (Align/DontAlign/AlwaysBreak/BlockIndent); v18 C-Template used Align.
+AlignAfterOpenBracket: true
+
+# Align fields of struct array initializers into columns (Left | Right | None).
 AlignArrayOfStructures: None
 
-# Align consecutive `=` assignments into columns. Supports a nested map with
-# Enabled/AcrossEmptyLines/AcrossComments/AlignCompound/etc; a bare keyword
-# (None/Consecutive/AcrossEmptyLines/AcrossComments/AcrossEmptyLinesAndComments)
-# also works.
+# Alignment settings for consecutive assignment statements.
 AlignConsecutiveAssignments:
-  Enabled: false
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
   AcrossEmptyLines: false
-  AcrossComments: false
-  AlignCompound: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: false
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
   AlignFunctionPointers: false
-  PadOperators: true
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    true
 
-# Align consecutive bit-field colons into columns.
+# Alignment settings for consecutive bit-field declarations.
 AlignConsecutiveBitFields:
-  Enabled: false
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
   AcrossEmptyLines: false
-  AcrossComments: false
-  AlignCompound: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: false
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
   AlignFunctionPointers: false
-  PadOperators: false
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    false
 
-# Align consecutive variable/function declaration names into columns.
+# Alignment settings for consecutive variable/function declarations.
 AlignConsecutiveDeclarations:
-  Enabled: false
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
   AcrossEmptyLines: false
-  AcrossComments: false
-  AlignCompound: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: true
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
   AlignFunctionPointers: false
-  PadOperators: false
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    false
 
-# Align consecutive macro definitions' replacement text into columns.
+# Alignment settings for consecutive #define macro definitions.
 AlignConsecutiveMacros:
-  Enabled: false
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
   AcrossEmptyLines: false
-  AcrossComments: false
-  AlignCompound: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: false
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
   AlignFunctionPointers: false
-  PadOperators: false
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    false
 
-# Align consecutive short `case`/switch-expression labels put on one line.
+# Alignment settings for consecutive short case statements (applies when AllowShortCaseExpressionOnASingleLine or AllowShortCaseLabelsOnASingleLine is true).
 AlignConsecutiveShortCaseStatements:
-  Enabled: false
+  # Enable aligning consecutive short case statements (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
   AcrossEmptyLines: false
-  AcrossComments: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Align '=>' arrows in short case expressions (bool: true | false).
+  AlignCaseArrows: false
+  # Align on the ':' rather than the tokens after ':' (bool: true | false).
   AlignCaseColons: false
 
-# Alignment of `\` at the end of multi-line macros (DontAlign, Left,
-# LeftWithLastLine, Right).
+# Alignment settings for consecutive TableGen DAGArg operator colons.
+AlignConsecutiveTableGenBreakingDAGArgColons:
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
+  AcrossEmptyLines: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: false
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
+  AlignFunctionPointers: false
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    false
+
+# Alignment settings for consecutive TableGen !cond operator colons.
+AlignConsecutiveTableGenCondOperatorColons:
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
+  AcrossEmptyLines: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: false
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
+  AlignFunctionPointers: false
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    false
+
+# Alignment settings for consecutive TableGen definition inheritance colons.
+AlignConsecutiveTableGenDefinitionColons:
+  # Enable consecutive alignment (bool: true | false).
+  Enabled:         false
+  # Align across empty lines (bool: true | false).
+  AcrossEmptyLines: false
+  # Align across comments (bool: true | false).
+  AcrossComments:  false
+  # Only for AlignConsecutiveAssignments: align compound assignments like += with = (bool: true | false).
+  AlignCompound:   false
+  # Only for AlignConsecutiveDeclarations: align function declarations (bool: true | false).
+  AlignFunctionDeclarations: false
+  # Only for AlignConsecutiveDeclarations: align function pointers (bool: true | false).
+  AlignFunctionPointers: false
+  # Only for AlignConsecutiveAssignments: left-pad shorter operators so all operators align on the right (bool: true | false).
+  PadOperators:    false
+
+# Alignment of trailing backslashes in multi-line macros (DontAlign | Left | LeftWithLastLine | Right).
 AlignEscapedNewlines: Right
 
-# Align operands of binary/ternary expressions that wrap onto new lines
-# (DontAlign, Align, AlignAfterOperator).
-AlignOperands: Align
+# Horizontally align operands of wrapped binary and ternary expressions (DontAlign | Align | AlignAfterOperator).
+AlignOperands:   Align
 
-# Alignment of trailing `//` comments. Supports Kind (Leave/Always/Never),
-# OverEmptyLines, and AlignPPAndNotPP.
+# Alignment settings for trailing line comments (// ...).
 AlignTrailingComments:
-  Kind: Always
-  OverEmptyLines: 0
+  # Align trailing comments on preprocessor directives with non-preprocessor ones (bool: true | false).
+  AlignPPAndNotPP: true
+  # How to align trailing comments (Leave | Always | Never).
+  Kind:            Always
+  # Number of empty lines across which trailing comments are aligned (unsigned).
+  OverEmptyLines:  0
 
-# --- Allow-on-a-single-line rules ----------------------------------------------
 
-# If a call/braced-init-list doesn't fit, allow all its arguments on one
-# extra line even when BinPackArguments is false.
+# --- Allow-on-a-single-line rules --------------------------------------------
+
+# Allow placing all call/braced-init arguments together on the next line if they don't fit on the current line (bool: true | false).
 AllowAllArgumentsOnNextLine: true
 
-# If a function declaration doesn't fit, allow all its parameters on one
-# extra line even when parameters would otherwise go one-per-line.
+# Allow placing all function declaration parameters together on the next line even when BinPackParameters is OnePerLine (bool: true | false).
 AllowAllParametersOfDeclarationOnNextLine: true
 
-# Whether a line break is allowed before `noexcept` (Never, OnlyWithParen,
-# Always).
+# Allow a line break before a noexcept specifier (Never | OnlyWithParen | Always).
 AllowBreakBeforeNoexceptSpecifier: Never
 
-# Merge blocks like `while (x) { ... }` onto one line (Never, Empty, Always).
+# Allow breaking before Qt Q_PROPERTY keywords (READ, WRITE, etc.) as if separated by commas (bool: true | false).
+AllowBreakBeforeQtProperty: false
+
+# Allow short blocks like 'while (true) { continue; }' on one line (Never | Empty | Always).
 AllowShortBlocksOnASingleLine: Never
 
-# Merge a short switch-expression rule (`case 1 -> 1;`) onto one line.
-# AllowShortCaseExpressionOnASingleLine: true     # v19: merge short switch-expression rules
+# Allow short switch labeled expressions/rules on a single line (bool: true | false).
+AllowShortCaseExpressionOnASingleLine: true
 
-# Merge `case 1: return;` onto one line.
+# Allow short case labels like 'case 1: x = 1; break;' on a single line (bool: true | false).
+# (LLVM default: false).
 AllowShortCaseLabelsOnASingleLine: true
 
-# Merge a short `requires { ... }` compound requirement onto one line.
+# Allow short C++20 compound requirements on a single line (bool: true | false).
 AllowShortCompoundRequirementOnASingleLine: true
 
-# Merge `enum { A, B } myEnum;` onto one line.
+# Allow short enum definitions on a single line (bool: true | false).
 AllowShortEnumsOnASingleLine: true
 
-# Merge short function bodies onto one line (None, InlineOnly, Empty,
-# Inline, All). Also configurable as a nested Empty/Inline/Other map.
+# Allow short functions on a single line (None | InlineOnly | Empty | Inline | All).
 AllowShortFunctionsOnASingleLine: All
 
-# Merge `if (a) return;` onto one line (Never, WithoutElse, OnlyFirstIf,
-# AllIfsAndElse).
+# Allow short if/else statements on a single line (Never | WithoutElse | OnlyFirstIf | AllIfsAndElse).
+# (LLVM default: Never).
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 
-# Merge short lambda bodies onto one line (None, Empty, Inline, All).
+# Allow short lambda expressions on a single line (None | Empty | Inline | All).
 AllowShortLambdasOnASingleLine: All
 
-# Merge `while (true) continue;` onto one line.
+# Allow short single-statement loops like 'while (true) continue;' on a single line (bool: true | false).
+# (LLVM default: false).
 AllowShortLoopsOnASingleLine: true
 
-# --- Breaking rules --------------------------------------------------------
+# Allow short namespaces like 'namespace a { class b; }' on a single line (bool: true | false).
+AllowShortNamespacesOnASingleLine: false
 
-# Break between adjacent string literals.
-BreakAdjacentStringLiterals: true
 
-# Break after a group of [[attributes]] before a declaration/statement
-# (Always, Leave, LeaveAll, Never).
-BreakAfterAttributes: Leave
+# --- Breaking rules ----------------------------------------------------------
 
-# Break after each Java @Annotation on a field.
-BreakAfterJavaFieldAnnotations: false
-
-# The function/definition return-type breaking style (deprecated, retained
-# for compatibility): None, All, TopLevel.
+# [DEPRECATED: use BreakAfterReturnType] Line break style after function definition return types (None | All | TopLevel).
+# Retained for compatibility; v18 C-Template kept None.
 AlwaysBreakAfterDefinitionReturnType: None
 
-# Renamed to BreakAfterReturnType; kept as None for compatibility.
-AlwaysBreakAfterReturnType: None
-
-# Break before multiline string literals for visual consistency.
+# Always break before multi-line string literals (bool: true | false).
 AlwaysBreakBeforeMultilineStrings: false
 
-# Renamed to BreakTemplateDeclarations; kept for compatibility (Leave, No,
-# MultiLine, Yes).
-AlwaysBreakTemplateDeclarations: MultiLine
+# Break between adjacent string literals when wrapping (bool: true | false).
+BreakAdjacentStringLiterals: true
 
-# Always break after a JSON array's opening `[` rather than trying to fit
-# elements on one line.
-BreakArrays: true
+# Break after C++11 attributes before declarations or control statements (Always | Leave | Never).
+BreakAfterAttributes: Leave
 
-# Wrap binary operators (None = break after, NonAssignment, All = break
-# before).
+# Break after each annotation on a field in Java (bool: true | false).
+BreakAfterJavaFieldAnnotations: false
+
+# Force a break after '{' of a braced initializer list (when Cpp11BracedListStyle is FunctionCall/AlignFirstComment) if it exceeds ColumnLimit (bool: true | false).
+BreakAfterOpenBracketBracedList: false
+
+# Force a break after '(' of a function declaration/definition/call if parameters exceed ColumnLimit (bool: true | false).
+BreakAfterOpenBracketFunction: false
+
+# Force a break after '(' of an 'if' statement if the condition exceeds ColumnLimit (bool: true | false).
+BreakAfterOpenBracketIf: false
+
+# Force a break after '(' of a loop statement if the header exceeds ColumnLimit (bool: true | false).
+BreakAfterOpenBracketLoop: false
+
+# Force a break after '(' of a 'switch' statement if the condition exceeds ColumnLimit (bool: true | false).
+BreakAfterOpenBracketSwitch: false
+
+# Line break style after function declaration/definition return types (Automatic | ExceptShortType | All | TopLevel | AllDefinitions | TopLevelDefinitions; None is deprecated).
+# Replaces deprecated AlwaysBreakAfterReturnType (v18 C-Template used None).
+BreakAfterReturnType: None
+
+# For JSON: always break after '[' instead of keeping short arrays on one line (bool: true | false).
+BreakArrays:     true
+
+# Line breaking around binary operators (None: break after | NonAssignment: break before except '=' | All: break before).
 BreakBeforeBinaryOperators: None
 
-# Whether a `template<...>` line can break before `concept` (Never,
-# Allowed, Always).
-BreakBeforeConceptDeclarations: Always
-
-# The overall brace-wrapping style: Attach, Linux, Mozilla, Stroustrup,
-# Allman, Whitesmiths, GNU, WebKit, Custom (see BraceWrapping below).
+# Brace placement preset (Attach | Linux | Mozilla | Stroustrup | Allman | Whitesmiths | GNU | WebKit | Custom).
 BreakBeforeBraces: Attach
 
-# Break before the colon in inline asm operand lists (Never, OnlyMultiline,
-# Always).
-BreakBeforeInlineASMColon: OnlyMultiline
-
-# Place `?`/`:` of a ternary after the line break rather than before it.
-BreakBeforeTernaryOperators: true
-
-# Where to break constructor initializer lists relative to `:` and `,`
-# (BeforeColon, BeforeComma, AfterColon, AfterComma).
-BreakConstructorInitializers: BeforeColon
-
-# Where to break a class's `: Base1, Base2` inheritance list (BeforeColon,
-# BeforeComma, AfterColon, AfterComma).
-BreakInheritanceList: BeforeColon
-
-# Allow breaking long string literals across lines.
-BreakStringLiterals: true
-
-# Fine control of exactly which braces get their own line, used only when
-# BreakBeforeBraces: Custom.
+# Fine-grained brace wrapping flags (used only when BreakBeforeBraces is set to Custom).
 BraceWrapping:
-  AfterCaseLabel: false
-  AfterClass: false
-  AfterControlStatement: Never    # Never, MultiLine, Always
-  AfterEnum: false
+  # Wrap before '{' of case labels (bool: true | false).
+  AfterCaseLabel:  false
+  # Wrap before '{' of class definitions (bool: true | false).
+  AfterClass:      false
+  # Wrap before '{' of control statements like if/for/while/switch (Never | MultiLine | Always).
+  AfterControlStatement: Never
+  # Wrap before '{' of enum definitions (bool: true | false).
+  AfterEnum:       false
+  # Wrap before '{' of extern blocks (bool: true | false).
   AfterExternBlock: false
-  AfterFunction: false
-  AfterNamespace: false
+  # Wrap before '{' of function definitions (bool: true | false).
+  AfterFunction:   false
+  # Wrap before '{' of namespace definitions (bool: true | false).
+  AfterNamespace:  false
+  # Wrap before '{' of Objective-C declarations (bool: true | false).
   AfterObjCDeclaration: false
-  AfterStruct: false
-  AfterUnion: false
-  BeforeCatch: false
-  BeforeElse: false
+  # Wrap before '{' of struct definitions (bool: true | false).
+  AfterStruct:     false
+  # Wrap before '{' of union definitions (bool: true | false).
+  AfterUnion:      false
+  # Wrap before 'catch' (bool: true | false).
+  BeforeCatch:     false
+  # Wrap before 'else' (bool: true | false).
+  BeforeElse:      false
+  # Wrap before '{' of lambda bodies (bool: true | false).
   BeforeLambdaBody: false
-  BeforeWhile: false
-  IndentBraces: false
+  # Wrap before 'while' in do-while loops (bool: true | false).
+  BeforeWhile:     false
+  # Indent the wrapped braces themselves (bool: true | false).
+  IndentBraces:    false
+  # Put empty function bodies on multiple lines when AfterFunction wraps (bool: true | false).
   SplitEmptyFunction: true
+  # Put empty class/struct/union bodies on multiple lines when wrapped (bool: true | false).
   SplitEmptyRecord: true
+  # Put empty namespace bodies on multiple lines when AfterNamespace wraps (bool: true | false).
   SplitEmptyNamespace: true
 
-# --- Comments, includes & macros --------------------------------------------
+# Force a break before '}' of a braced initializer list when it exceeds ColumnLimit (bool: true | false).
+BreakBeforeCloseBracketBracedList: false
 
-# A regex for special comments (e.g. IWYU pragmas) that must never be
-# reformatted or split.
-CommentPragmas: '^ IWYU pragma:'
+# Force a break before ')' of a function declaration/definition/call when parameters exceed ColumnLimit (bool: true | false).
+BreakBeforeCloseBracketFunction: false
 
-# Reflow (rewrap) over-long comments to fit the column limit.
-ReflowComments: true
+# Force a break before ')' of an 'if' statement when it exceeds ColumnLimit and broke after '(' (bool: true | false).
+BreakBeforeCloseBracketIf: false
 
-# Sort `#include` blocks: Preserve (each block separately), Merge (combine
-# and sort), Regroup (combine, sort, then re-split by IncludeCategories).
-IncludeBlocks: Preserve
+# Force a break before ')' of a loop statement when it exceeds ColumnLimit and broke after '(' (bool: true | false).
+BreakBeforeCloseBracketLoop: false
 
-# Regex-based categories used to order/group #includes when IncludeBlocks
-# is Merge or Regroup. Priority controls ordering; SortPriority controls
-# grouping. Lower Priority sorts first; the file's own main header is
-# always category 0.
+# Force a break before ')' of a 'switch' statement when it exceeds ColumnLimit (bool: true | false).
+BreakBeforeCloseBracketSwitch: false
+
+# Whether to break before 'concept' after a template declaration (Never | Allowed | Always).
+BreakBeforeConceptDeclarations: Always
+
+# Whether to break before ':' in inline assembly statements (Never | OnlyMultiline | Always).
+BreakBeforeInlineASMColon: OnlyMultiline
+
+# Break before template closing '>' when there is a break after '<' (bool: true | false).
+BreakBeforeTemplateCloser: false
+
+# Place ternary '?' and ':' operators at the start of wrapped lines (bool: true | false).
+BreakBeforeTernaryOperators: true
+
+# How to break chained binary operations (Never | OnePerLine | RespectPrecedence).
+BreakBinaryOperations: Never
+
+# Break style for constructor initializer lists (BeforeColon | BeforeComma | AfterColon).
+BreakConstructorInitializers: BeforeColon
+
+# Always break before function definition parameter lists (bool: true | false).
+BreakFunctionDefinitionParameters: false
+
+# Break style for class inheritance lists (BeforeColon | BeforeComma | AfterColon | AfterComma).
+BreakInheritanceList: BeforeColon
+
+# Allow splitting long string literals across multiple lines (bool: true | false).
+BreakStringLiterals: true
+
+# Break after template<...> declarations (Leave | No | MultiLine | Yes; false/true are aliases for No/Yes).
+# Replaces deprecated AlwaysBreakTemplateDeclarations (v18 C-Template used MultiLine).
+BreakTemplateDeclarations: MultiLine
+
+
+# --- Comments, includes & macros ---------------------------------------------
+
+# Regex matching special comments that must not be split or reflowed (string regex).
+CommentPragmas:  '^ IWYU pragma:'
+
+# Comment indentation and line-wrapping behavior (Never | IndentOnly | Always).
+# Replaces v18 bool true/false (true -> Always, false -> Never).
+ReflowComments:  Always
+
+# How multiple #include blocks are grouped when sorting includes (Preserve | Merge | Regroup).
+IncludeBlocks:   Preserve
+
+# Ordered regex rules assigning Priority, SortPriority, and CaseSensitive matching to #include paths (list of maps).
+# Entry keys: Regex (POSIX extended), Priority (int, lower first), SortPriority (int, for Regroup), CaseSensitive (bool)
 IncludeCategories:
-  - Regex: '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority: 2
-    SortPriority: 0
-    CaseSensitive: false
-  - Regex: '^(<|"(gtest|gmock|isl|json)/)'
-    Priority: 3
-    SortPriority: 0
-    CaseSensitive: false
-  - Regex: '.*'
-    Priority: 1
-    SortPriority: 0
-    CaseSensitive: false
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
+    Priority:        3
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '.*'
+    Priority:        1
+    SortPriority:    0
+    CaseSensitive:   false
 
-# Regex of allowed suffixes when guessing whether an #include is the file's
-# "main" header (which is always sorted first).
+# Regex of allowed suffixes between a source filename stem and its main header (string regex).
 IncludeIsMainRegex: '(Test)?$'
 
-# Regex of extra file-extension suffixes allowed to be treated as a "main"
-# source file for the include-is-main heuristic above.
+# Regex for source file extensions/suffixes considered 'main' files for main-header detection (string regex).
 IncludeIsMainSourceRegex: ''
 
-# Sort `#include`s alphabetically within each block (Never, CaseSensitive,
-# CaseInsensitive).
-SortIncludes: CaseSensitive
+# Delimiter required on #include directives to match the main header (Quote | AngleBracket | Any).
+MainIncludeChar: Quote
 
-# Sort consecutive `using` declarations (Never, Lexicographic,
-# LexicographicNumeric).
+# Settings controlling #include directive sorting.
+# Replaces v18 scalar enum (Never/CaseSensitive/CaseInsensitive); v18 C-Template used CaseSensitive (Enabled: true, IgnoreCase: false).
+SortIncludes:
+  # Enable sorting #include directives (bool: true | false).
+  Enabled:         true
+  # Sort #includes case-insensitively (bool: true | false).
+  IgnoreCase:      false
+  # Ignore file extensions when sorting unless paths otherwise compare equal (bool: true | false).
+  IgnoreExtension: false
+
+# How to sort C++ 'using' declarations (Never | Lexicographic | LexicographicNumeric).
 SortUsingDeclarations: LexicographicNumeric
 
-# Sort static imports before/after non-static ones in Java.
+# Where to place static imports when sorting Java imports (Before | After).
 SortJavaStaticImport: Before
 
-# Macros that should be treated as `foreach` loops rather than function
-# calls, so their bodies format like a loop.
+# Ordered package prefixes defining empty-line-separated groups for Java imports (list of strings).
+JavaImportGroups: []
+
+# Identifiers interpreted as attributes/qualifiers rather than regular identifiers (list of strings).
+AttributeMacros:
+  - __capability
+
+# Macros treated as range/foreach loops rather than function calls (list of strings).
 ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
 
-# Macros that should be treated as `if`-like conditionals.
+# Macros treated as conditionals rather than function calls (list of strings).
 IfMacros:
   - KJ_IF_MAYBE
 
-# Macros to treat as attributes/qualifiers rather than identifiers.
-AttributeMacros:
-  - __capability
-
-# Macros whose surrounding braces mark a literal block boundary (rare;
-# usually left empty).
+# Regex matching macros that begin an indented block (string regex).
 MacroBlockBegin: ''
-MacroBlockEnd: ''
 
-# Detect one-per-line vs bin-packed call/definition formatting from the
-# surrounding file. Experimental — avoid relying on it.
-ExperimentalAutoDetectBinPacking: false
+# Regex matching macros that end an indented block (string regex).
+MacroBlockEnd:   ''
 
-# Skip reformatting the body of object-like macros defined with these names.
-# (Not in the v18 dump; add manually if supported: SkipMacroDefinitionBody)
+# Macro expansion definitions in '<definition>=<expansion>' form used during formatting (list of strings).
+Macros:          []
 
-# Macros treated like statement attributes (e.g. Qt's Q_EMIT).
+# Function-like macros whose invocations are skipped by RemoveParentheses (list of strings).
+MacrosSkippedByRemoveParentheses: []
+
+# Macros that open namespace-like blocks, e.g. TESTSUITE (list of strings).
+NamespaceMacros: []
+
+# Macros ignored in front of statements as if they were attributes, e.g. Qt Q_EMIT (list of strings).
 StatementAttributeLikeMacros:
   - Q_EMIT
 
-# Macros treated as full statements, not expressions (get a trailing `;`
-# treatment, no wrapping oddities).
+# Macros interpreted as complete statements, e.g. Q_UNUSED (list of strings).
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
 
-# Macros where whitespace inside their arguments must be preserved exactly.
+# Non-keyword identifiers treated as template names so '<' is parsed as a template opener (list of strings).
+TemplateNames:   []
+
+# Non-keyword identifiers treated as type names for pointer/reference vs binary operator disambiguation (list of strings).
+TypeNames:       []
+
+# Macros interpreted as type declarations instead of function calls, e.g. STACK_OF (list of strings).
+TypenameMacros:  []
+
+# Non-keyword identifiers treated as variable template names (list of strings).
+VariableTemplates: []
+
+# Macros whose internal whitespace must not be altered, e.g. STRINGIZE (list of strings).
 WhitespaceSensitiveMacros:
   - BOOST_PP_STRINGIZE
   - CF_SWIFT_NAME
@@ -341,314 +520,423 @@ WhitespaceSensitiveMacros:
   - PP_STRINGIZE
   - STRINGIZE
 
+# Skip formatting the body of #define macro definitions (bool: true | false).
+SkipMacroDefinitionBody: false
+
+# Experimentally detect whether calls/definitions in the file use one-per-line or bin-packed style (bool: true | false).
+ExperimentalAutoDetectBinPacking: false
+
+
 # --- Namespaces --------------------------------------------------------------
 
-# Collapse consecutive `namespace Foo { namespace Bar {` onto one line.
+# Place consecutive nested namespace declarations on the same line (bool: true | false).
 CompactNamespaces: false
 
-# Add/fix `// namespace Foo` end-of-namespace comments.
+# Add missing or fix invalid closing '// namespace ...' comments (bool: true | false).
 FixNamespaceComments: true
 
-# Namespace bodies at/under this many lines are exempt from
-# FixNamespaceComments.
+# Maximum unwrapped lines a namespace may span to still be treated as short by FixNamespaceComments (unsigned).
 ShortNamespaceLines: 1
 
-# Indent contents of namespace bodies (None, Inner, All).
+# Indentation inside namespace blocks (None | Inner | All).
 NamespaceIndentation: None
 
-# --- Indentation ---------------------------------------------------------------
+# Empty lines immediately inside namespace opening and closing braces (Never | Always | Leave).
+WrapNamespaceBodyWithEmptyLines: Leave
 
-# Give access modifiers (public:/private:) their own indent level instead
-# of indenting relative to members.
+
+# --- Indentation -------------------------------------------------------------
+
+# Columns to indent contents of braced initializer lists; if negative, ContinuationIndentWidth is used (int).
+BracedInitializerIndentWidth: -1
+
+# Indentation width for constructor initializer lists and inheritance lists (unsigned).
+ConstructorInitializerIndentWidth: 4
+
+# Give access modifiers their own indentation level relative to the surrounding class/struct (bool: true | false).
 IndentAccessModifiers: false
 
-# Indent the block under a `case` label one level further than the label.
+# Indent braced blocks inside switch case labels one level further from the case label (bool: true | false).
 IndentCaseBlocks: false
 
-# Indent `case` labels one level further than their `switch`.
+# Indent switch case labels one level inside the switch statement (bool: true | false).
+# (LLVM default: false).
 IndentCaseLabels: true
 
-# Indenting style for `extern "C" { ... }` blocks (AfterExternBlock,
-# NoIndent, Indent).
+# Indent the body of C++20 'export { ... }' blocks (bool: true | false).
+IndentExportBlock: true
+
+# Indentation of 'extern "C" { ... }' blocks (AfterExternBlock | NoIndent | Indent).
 IndentExternBlock: AfterExternBlock
 
-# Indent `goto` labels (NoIndent, OuterIndent, InnerIndent, HalfIndent).
+# Indent goto labels; if false, labels are flush left (bool: true | false).
 IndentGotoLabels: true
 
-# Indent style for preprocessor directives (None, AfterHash, BeforeHash,
-# Leave).
+# Indentation of preprocessor directives (None | AfterHash | BeforeHash | Leave).
 IndentPPDirectives: None
 
-# Extra indent width for preprocessor directives when IndentPPDirectives
-# isn't None/Leave. -1 = use IndentWidth.
-PPIndentWidth: -1
+# Indentation width for preprocessor directives; -1 uses IndentWidth (int).
+PPIndentWidth:   -1
 
-# Indent a `requires` clause under a template declaration.
+# Indent C++20 requires clauses in templates when placed on their own line or with following declaration (bool: true | false).
 IndentRequiresClause: true
 
-# Where the `requires` clause goes relative to a template/function
-# (OwnLine, WithFollowing, WithPreceding, SingleLine, etc.).
+# Placement of C++20 requires clauses (OwnLine | OwnLineWithBrace | WithPreceding | WithFollowing | SingleLine).
 RequiresClausePosition: OwnLine
 
-# How the body of a `requires { ... }` expression is indented
-# (OuterScope, Keyword).
+# Indentation base for C++20 requires expression bodies (OuterScope | Keyword).
 RequiresExpressionIndentation: OuterScope
 
-# Indent a wrapped function name (return type on its own line, name on the
-# next) one extra level.
+# Indent function names when wrapped onto a new line after the return type (bool: true | false).
 IndentWrappedFunctionNames: false
 
-# --- Spacing --------------------------------------------------------------
+# Indentation base for lambda bodies (Signature | OuterScope).
+LambdaBodyIndentation: Signature
 
-# Space around `:` in bit-fields (Both, None, Before, After).
+
+# --- Spacing -----------------------------------------------------------------
+
+# Spacing around ':' in bit-field declarations (Both | None | Before | After).
 BitFieldColonSpacing: Both
 
-# Space after a C-style cast, e.g. `(int) x`.
+# Insert a space after C-style casts like '(int) x' (bool: true | false).
 SpaceAfterCStyleCast: false
 
-# Space after `!`, e.g. `! x`.
+# Insert a space after logical NOT '!' (bool: true | false).
 SpaceAfterLogicalNot: false
 
-# Space after the `template` keyword before `<`.
+# Insert a space after the 'operator' keyword (bool: true | false).
+SpaceAfterOperatorKeyword: false
+
+# Insert a space after the 'template' keyword (bool: true | false).
 SpaceAfterTemplateKeyword: true
 
-# Space placement around `*`/`&` pointer/reference qualifiers (Default,
-# Before, After, Both).
+# Spacing around pointer qualifiers like 'const' in 'void *const p' (Default | Before | After | Both).
 SpaceAroundPointerQualifiers: Default
 
-# Space before `=`, `+=`, etc.
+# Insert a space before assignment operators like '=' and '+=' (bool: true | false).
 SpaceBeforeAssignmentOperators: true
 
-# Space before the colon in a `case` label.
+# Insert a space before ':' in case labels (bool: true | false).
 SpaceBeforeCaseColon: false
 
-# Space before a C++11 `{}` braced init list following a name.
+# Insert a space before a C++11 braced initializer list (bool: true | false).
+# (LLVM default: false).
 SpaceBeforeCpp11BracedList: true
 
-# Space before the `:` that starts a constructor initializer list.
+# Insert a space before ':' in constructor initializer lists (bool: true | false).
 SpaceBeforeCtorInitializerColon: true
 
-# Space before the `:` that starts a class's inheritance list.
+# Insert a space before ':' in class inheritance lists (bool: true | false).
 SpaceBeforeInheritanceColon: true
 
-# Space before `:` in a JSON key.
+# Insert a space before ':' in JSON objects (bool: true | false).
 SpaceBeforeJsonColon: false
 
-# When to put a space before `(` (Never, ControlStatements,
-# ControlStatementsExceptControlMacros, NonEmptyParentheses, Always,
-# Custom — see SpaceBeforeParensOptions).
+# When to insert a space before '(' (ControlStatements | ControlStatementsExceptControlMacros | NonEmptyParentheses | Always | Custom; Never is deprecated).
+# Note: In clang-format 19+, 'Never' acts as a deprecated alias for 'Custom' with SpaceBeforeParensOptions set to false (except AfterPlacementOperator).
+# (LLVM default: ControlStatements).
 SpaceBeforeParens: Never
 
-# Fine-grained control used only when SpaceBeforeParens: Custom.
+# Fine-grained space-before-parentheses flags (used when SpaceBeforeParens is set to Custom).
+# Active when SpaceBeforeParens is Custom (while SpaceBeforeParens: Never is set above, clang-format overrides control/macro flags to false).
 SpaceBeforeParensOptions:
+  # Space after control keywords like if/for/while/switch (bool: true | false).
   AfterControlStatements: true
+  # Space after macros listed in ForEachMacros (bool: true | false).
   AfterForeachMacros: true
+  # Space between function definition name and '(' (bool: true | false).
   AfterFunctionDefinitionName: false
+  # Space between function declaration name and '(' (bool: true | false).
   AfterFunctionDeclarationName: false
-  AfterIfMacros: true
+  # Space after macros listed in IfMacros (bool: true | false).
+  AfterIfMacros:   true
+  # Space between alternative operator 'not' and '(' (bool: true | false).
+  AfterNot:        false
+  # Space between overloaded operator name and '(' (bool: true | false).
   AfterOverloadedOperator: false
+  # Space between operator new/delete and '(' (bool: true | false).
   AfterPlacementOperator: true
+  # Space between 'requires' keyword in a requires clause and '(' (bool: true | false).
   AfterRequiresInClause: false
+  # Space between 'requires' keyword in a requires expression and '(' (bool: true | false).
   AfterRequiresInExpression: false
+  # Space before '(' only when the parentheses are non-empty (bool: true | false).
   BeforeNonEmptyParentheses: false
 
-# Space before the `:` in a range-based `for`.
+# Insert a space before ':' in range-based for loops (bool: true | false).
 SpaceBeforeRangeBasedForLoopColon: true
 
-# Space before `[` (mostly relevant to lambda captures).
+# Insert a space before '[' except on lambdas (bool: true | false).
 SpaceBeforeSquareBrackets: false
 
-# Space inside an otherwise-empty `{}` block.
-SpaceInEmptyBlock: false
+# When to insert a space inside empty braces '{}' (Always | Block | Never).
+# Replaces deprecated SpaceInEmptyBlock (v18 C-Template used false -> Never).
+SpaceInEmptyBraces: Never
 
-# Number of spaces before a trailing `//` comment.
+# Number of spaces before trailing // line comments (unsigned).
 SpacesBeforeTrailingComments: 1
 
-# Space inside `< >` template angle brackets (Never, Always, Leave).
-SpacesInAngles: Never
+# Spaces inside template angle brackets '<...>' (Never | Always | Leave).
+SpacesInAngles:  Never
 
-# Space inside container literals like `[1, 2, 3]` (mainly ObjC/Proto/JSON).
+# Insert spaces inside container literals such as ObjC/JS arrays and dicts (bool: true | false).
 SpacesInContainerLiterals: true
 
-# Minimum/maximum spaces after `//` before a line comment's text.
+# Allowed leading spaces after '//' in single-line comments.
 SpacesInLineCommentPrefix:
-  Minimum: 1
-  Maximum: -1
+  # Minimum number of spaces at the start of a // line comment (unsigned).
+  Minimum:         1
+  # Maximum number of spaces at the start of a // line comment (-1 disables maximum).
+  Maximum:         -1
 
-# Space inside `()` in general (Never, Always, Custom — see
-# SpacesInParensOptions).
-SpacesInParens: Never
+# When to insert spaces after '(' and before ')' (Never | Custom).
+SpacesInParens:  Never
 
-# Fine-grained control used only when SpacesInParens: Custom.
+# Fine-grained space-inside-parentheses flags (used when SpacesInParens is set to Custom).
 SpacesInParensOptions:
-  InCStyleCasts: false
+  # Prevent adding spaces when both '(' and ')' are doubled, e.g. ((x)) (bool: true | false).
+  ExceptDoubleParentheses: false
+  # Insert spaces inside C-style cast parentheses (bool: true | false).
+  InCStyleCasts:   false
+  # Insert spaces inside if/for/while/switch condition parentheses (bool: true | false).
   InConditionalStatements: false
+  # Insert a space inside empty parentheses '()' (bool: true | false).
   InEmptyParentheses: false
-  Other: false
+  # Insert spaces inside parentheses not covered by the other options (bool: true | false).
+  Other:           false
 
-# Space inside `[]` square brackets.
+# Insert spaces inside '[...]' except empty lambdas or unsized array declarations (bool: true | false).
 SpacesInSquareBrackets: false
+
 
 # --- Empty lines -------------------------------------------------------------
 
-# Empty line after public:/private:/protected: (Never, Leave, Always).
+# Empty lines after access modifiers like 'public:' (Never | Leave | Always).
 EmptyLineAfterAccessModifier: Never
 
-# Empty line before public:/private:/protected: (Never, Leave,
-# LogicalBlock, Always).
+# Empty lines before access modifiers (Never | Leave | LogicalBlock | Always).
 EmptyLineBeforeAccessModifier: LogicalBlock
 
-# Maximum consecutive empty lines to keep anywhere in the file.
+# Maximum number of consecutive empty lines to keep (unsigned).
 MaxEmptyLinesToKeep: 1
 
-# Keep existing empty lines at the very start of a `{}` block.
-KeepEmptyLinesAtTheStartOfBlocks: true
+# Which empty lines are preserved (see MaxEmptyLinesToKeep for consecutive limit).
+# Replaces deprecated KeepEmptyLinesAtTheStartOfBlocks (true) and KeepEmptyLinesAtEOF (false).
+KeepEmptyLines:
+  # Keep empty lines at the end of a file (bool: true | false).
+  AtEndOfFile:     false
+  # Keep empty lines at the start of a block (bool: true | false).
+  AtStartOfBlock:  true
+  # Keep empty lines at the start of a file (bool: true | false).
+  AtStartOfFile:   true
 
-# Keep existing empty lines at end of file (instead of trimming them).
-KeepEmptyLinesAtEOF: false
+# Preserve form feed characters (^L) surrounded by newlines (bool: true | false).
+KeepFormFeed:    false
 
-# Insert a trailing newline at end of file if one is missing.
+# Remove empty lines inside statements/unwrapped lines (bool: true | false).
+RemoveEmptyLinesInUnwrappedLines: false
+
+# Empty lines separating top-level/class/struct/enum/function definition blocks (Leave | Always | Never).
+SeparateDefinitionBlocks: Leave
+
+# Ensure the formatted file ends with a trailing newline (bool: true | false).
 InsertNewlineAtEOF: false
+
 
 # --- Pointers, references & qualifiers ---------------------------------------
 
-# `*`/`&` binding side for pointers (Left, Right, Middle).
+# Alignment of '*' and '&' in declarations (Left | Right | Middle).
 PointerAlignment: Right
 
-# `&`/`&&` binding side for references — Pointer means "match
-# PointerAlignment" (Pointer, Left, Right, Middle).
+# Alignment of '&' and '&&', optionally overriding PointerAlignment (Pointer | Left | Right | Middle).
 ReferenceAlignment: Pointer
 
-# Guess pointer/reference alignment from the file itself; PointerAlignment
-# is then only the fallback.
+# Infer PointerAlignment and ReferenceAlignment from the file's existing majority style (bool: true | false).
 DerivePointerAlignment: false
 
-# Reorder `const`/`volatile` qualifiers to a consistent side (Leave, Left,
-# Right, Custom).
+# Arrangement of cv/specifier qualifiers like const/volatile (Leave | Left | Right | Custom; Custom requires QualifierOrder).
 QualifierAlignment: Leave
 
-# --- Constructors, lambdas & templates ---------------------------------------
+# Order of qualifiers when QualifierAlignment is Custom (must contain 'type'; allowed: const, inline, static, friend, constexpr, volatile, restrict, type).
+# NOTE: Kept commented out because clang-format rejects QualifierOrder unless QualifierAlignment is set to Custom.
+# QualifierOrder: [inline, static, type, const, volatile]
 
-# How constructor member-initializers are packed onto lines (BinPack,
-# NextLine, CurrentLine).
-PackConstructorInitializers: BinPack
 
-# Indent width for constructor-initializer and inheritance lists.
-ConstructorInitializerIndentWidth: 4
+# --- Braced init lists, constructors & bin-packing ---------------------------
 
-# How a lambda's body is indented relative to its signature (Signature,
-# OuterScope).
-LambdaBodyIndentation: Signature
+# How braced initializer lists are formatted (Block | FunctionCall | AlignFirstComment).
+# Replaces v18 bool true/false (v18 C-Template used true; LLVM v22 default is AlignFirstComment).
+Cpp11BracedListStyle: AlignFirstComment
 
-# The C++/ObjC standard clang-format assumes when parsing (Latest, c++03,
-# c++11, ..., c++23, Auto, etc.).
-Standard: Latest
-
-# --- Braced init lists & bin-packing -----------------------------------------
-
-# Formatting style for `{}` braced lists (Block = pre-C++11 style with
-# spaces, FunctionCall = format like a call, AlignFirstComment).
-Cpp11BracedListStyle: true
-
-# Whether function-call/definition arguments are packed onto one line when
-# possible (true) or always one-per-line once wrapped (false).
+# If true, pack multiple call arguments per line; if false, put all on one line or one per line (bool: true | false).
 BinPackArguments: true
 
-# Whether function-declaration parameters are bin-packed the same way.
-BinPackParameters: true
+# Override BinPackArguments: false and bin-pack braced initializer lists with 20 or more items (bool: true | false).
+BinPackLongBracedList: true
 
-# Insert (JS only) trailing commas in wrapped array/object literals (None,
-# Wrapped). Incompatible with BinPackArguments.
+# How to pack function declaration/definition parameters (BinPack | OnePerLine | AlwaysOnePerLine).
+# Replaces v18 bool true/false (v18 C-Template used true -> BinPack).
+BinPackParameters: BinPack
+
+# Packing style for constructor initializer lists (Never | BinPack | CurrentLine | NextLine | NextLineOnly).
+PackConstructorInitializers: BinPack
+
+# Insert trailing commas in multi-line container literals (None | Wrapped; Wrapped requires BinPackArguments: false and BinPackParameters: OnePerLine/AlwaysOnePerLine).
 InsertTrailingCommas: None
 
-# --- Braces / control-flow rewriting (use with care) -------------------------
+# Handling of trailing commas in enum enumerator lists (Leave | Insert | Remove).
+EnumTrailingComma: Leave
 
-# Insert braces around single-statement if/else/for/while/do bodies.
-# NOTE: purely syntactic; review the diff before trusting it blindly.
-InsertBraces: false
 
-# Remove braces from single-statement if/else/for/while/do bodies where
-# LLVM style would omit them. Same caveat as above.
+# --- Braces / control-flow & token rewriting (use with care) -----------------
+
+# Insert braces around single-statement control flow bodies (if/else/for/do/while) in C++ (bool: true | false).
+InsertBraces:    false
+
+# Remove optional braces on single-statement control blocks (if/else/for/while) per LLVM style (bool: true | false).
 RemoveBracesLLVM: false
 
-# Remove redundant parentheses (Leave, MultipleParentheses, ReturnStatement).
+# Remove redundant parentheses (Leave | MultipleParentheses | ReturnStatement).
 RemoveParentheses: Leave
 
-# Remove unnecessary trailing semicolons.
+# Remove redundant semicolons after closing braces of functions/constructors/destructors (bool: true | false).
 RemoveSemicolon: false
 
-# --- Integer literal separators ----------------------------------------------
 
-# Insert/remove digit-group separators (`'` in C++, `_` elsewhere) in
-# binary/decimal/hex integer literals. Negative = remove, 0 = leave,
-# positive = insert every N digits. *MinDigits sets a minimum literal
-# length before inserting.
+# --- Integer literal separators & numeric literals ---------------------------
+
+# Grouping and digit thresholds for integer literal separators (' in C++, _ in C#/Java/JS).
 IntegerLiteralSeparator:
-  Binary: 0
-  BinaryMinDigits: 0
-  Decimal: 0
-  DecimalMinDigits: 0
-  Hex: 0
-  HexMinDigits: 0
+  # Digit group size for binary literals (-1: remove, 0: leave as is, >0: group size).
+  Binary:          0
+  # Minimum digits required before inserting separators in binary literals (0: no minimum).
+  BinaryMinDigitsInsert: 0
+  # Maximum digits up to which separators are always removed in binary literals (0: disabled).
+  BinaryMaxDigitsRemove: 0
+  # Digit group size for decimal literals (-1: remove, 0: leave as is, >0: group size).
+  Decimal:         0
+  # Minimum digits required before inserting separators in decimal literals (0: no minimum).
+  DecimalMinDigitsInsert: 0
+  # Maximum digits up to which separators are always removed in decimal literals (0: disabled).
+  DecimalMaxDigitsRemove: 0
+  # Digit group size for hexadecimal literals (-1: remove, 0: leave as is, >0: group size).
+  Hex:             0
+  # Minimum digits required before inserting separators in hexadecimal literals (0: no minimum).
+  HexMinDigitsInsert: 0
+  # Maximum digits up to which separators are always removed in hexadecimal literals (0: disabled).
+  HexMaxDigitsRemove: 0
+  # DEPRECATED alias for BinaryMinDigitsInsert (do not keep both enabled, or this value overrides BinaryMinDigitsInsert).
+  # BinaryMinDigits: 0
+  # DEPRECATED alias for DecimalMinDigitsInsert (do not keep both enabled, or this value overrides DecimalMinDigitsInsert).
+  # DecimalMinDigits: 0
+  # DEPRECATED alias for HexMinDigitsInsert (do not keep both enabled, or this value overrides HexMinDigitsInsert).
+  # HexMinDigits:    0
+
+# Letter-casing rules for numeric literal components (prefix, hex digits, exponent, suffix).
+NumericLiteralCase:
+  # Case for floating-point exponent letters like e/E or p/P (Leave | Upper | Lower).
+  ExponentLetter:  Leave
+  # Case for hexadecimal digits A-F / a-f (Leave | Upper | Lower).
+  HexDigit:        Leave
+  # Case for numeric prefixes like 0x/0b (Leave | Upper | Lower).
+  Prefix:          Leave
+  # Case for numeric literal suffixes excluding reserved ones like min (Leave | Upper | Lower).
+  Suffix:          Leave
+
 
 # --- Penalties (tie-breakers the line-wrapping algorithm optimizes over) -----
 
+# Penalty for breaking around an assignment operator (unsigned).
 PenaltyBreakAssignment: 2
+
+# Penalty for breaking immediately after '(' in a function call (unsigned).
 PenaltyBreakBeforeFirstCallParameter: 19
+
+# Penalty for breaking before '.' or '->' member access operators (unsigned).
+PenaltyBreakBeforeMemberAccess: 150
+
+# Penalty for each line break introduced inside a comment (unsigned).
 PenaltyBreakComment: 300
+
+# Penalty for breaking before the first '<<' operator (unsigned).
 PenaltyBreakFirstLessLess: 120
+
+# Penalty for breaking after '(' (unsigned).
 PenaltyBreakOpenParenthesis: 0
+
+# Penalty for breaking after '::' scope resolution operator (unsigned).
 PenaltyBreakScopeResolution: 500
+
+# Penalty for each line break introduced inside a string literal (unsigned).
 PenaltyBreakString: 1000
+
+# Penalty for breaking after a template declaration (unsigned).
 PenaltyBreakTemplateDeclaration: 10
+
+# Penalty for each character exceeding ColumnLimit (unsigned).
 PenaltyExcessCharacter: 1000000
+
+# Penalty per character of indentation whitespace (unsigned).
 PenaltyIndentedWhitespace: 0
+
+# Penalty for placing a function's return type on its own line (unsigned).
 PenaltyReturnTypeOnItsOwnLine: 60
 
-# --- Objective-C ---------------------------------------------------------------
 
+# --- Objective-C -------------------------------------------------------------
+
+# Bin-packing behavior for Objective-C protocol conformance lists (Auto | Always | Never).
 ObjCBinPackProtocolList: Auto
+
+# Indentation width for Objective-C block literals (unsigned).
 ObjCBlockIndentWidth: 2
+
+# Break parameter lists onto lines when a call contains nested Objective-C block parameters (bool: true | false).
 ObjCBreakBeforeNestedBlockParam: true
+
+# Preferred ordering of Objective-C @property attributes, e.g. [class, direct, atomic, nonatomic, ...] (list of strings).
+ObjCPropertyAttributeOrder: []
+
+# Insert a space after '@property' in Objective-C, e.g. '@property (readonly)' (bool: true | false).
 ObjCSpaceAfterProperty: false
+
+# Insert a space before Objective-C protocol lists, e.g. 'Foo <Protocol>' (bool: true | false).
 ObjCSpaceBeforeProtocolList: true
 
-# --- JavaScript / Verilog ----------------------------------------------------
 
+# --- JavaScript / TableGen / Verilog / Raw strings ---------------------------
+
+# Quote style for JavaScript strings (Leave | Single | Double).
 JavaScriptQuotes: Leave
+
+# Wrap long JavaScript import/export statements (bool: true | false).
 JavaScriptWrapImports: true
+
+# Line breaking inside TableGen DAGArg lists (DontBreak | BreakElements | BreakAll).
+TableGenBreakInsideDAGArg: DontBreak
+
+# TableGen DAGArg operator names allowed to break when TableGenBreakInsideDAGArg is not DontBreak (list of strings).
+TableGenBreakingDAGArgOperators: []
+
+# In Verilog, place each port connection on its own line in module instantiations (bool: true | false).
 VerilogBreakBetweenInstancePorts: true
 
-# --- Misc --------------------------------------------------------------------
+# Sub-formatting hints for C++ raw string literals (list of maps with keys: Language, Delimiters, EnclosingFunctions, CanonicalDelimiter, BasedOnStyle).
+RawStringFormats: []
+# Example:
+# RawStringFormats:
+#   - Language:          Cpp
+#     Delimiters:        [cc, cpp]
+#     EnclosingFunctions: []
+#     CanonicalDelimiter: cc
+#     BasedOnStyle:      LLVM
 
-# Split unrelated top-level definitions with a blank line (Leave, Always,
-# Never).
-SeparateDefinitionBlocks: Leave
+# --- Upcoming options (clang-format 23+, commented out) ----------------------
 
-# =============================================================================
-# Newer options (clang-format 19-23) not present in this v18 dump.
-# Uncomment and adjust if your clang-format binary is new enough to know them.
-# =============================================================================
-# AllowShortNamespacesOnASingleLine: false        # v20: `namespace a { class b; }` on one line
+# Uncomment if using clang-format 23 or newer:
 # AllowShortRecordOnASingleLine: Never            # v23: `struct bar { int i; };` on one line
-# BreakAfterReturnType: Automatic                 # v19: replaces AlwaysBreakAfterReturnType
 # BreakBeforeReturnType: None                     # v23: force break before return type
-# BreakTemplateDeclarations: MultiLine            # v19: replaces AlwaysBreakTemplateDeclarations
-# BreakBeforeTemplateCloser: false                # v21: break before template's closing `>`
-# BreakFunctionDeclarationParameters: false       # v23
-# BreakFunctionDefinitionParameters: false        # v19
-# BreakAfterOpenBracketBracedList: false          # v22
-# BreakAfterOpenBracketFunction: false            # v22
-# BreakAfterOpenBracketIf: false                  # v22
-# BreakAfterOpenBracketLoop: false                # v22
-# BreakAfterOpenBracketSwitch: false              # v22
-# BreakBeforeCloseBracketBracedList: false        # v22
-# BreakBeforeCloseBracketFunction: false          # v22
-# BreakBeforeCloseBracketIf: false                # v22
-# BreakBeforeCloseBracketLoop: false              # v22
-# BreakBeforeCloseBracketSwitch: false            # v22
-# BreakBinaryOperations: Never                    # v20/23: Never, OnePerLine, RespectPrecedence
-# BinPackLongBracedList: false                    # v21: bin-pack lists with 20+ items
-# EnumTrailingComma: Leave                        # v21: Leave, Insert, Remove
-# AllowBreakBeforeQtProperty: false               # v22
-# OneLineFormatOffRegex: ''                       # disables formatting per matching line
+# BreakFunctionDeclarationParameters: false       # v23: always break before function declaration parameters
+
+...
