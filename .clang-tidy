@@ -1,31 +1,78 @@
-# clang-tidy configuration (used by clangd in the editor and by `make tidy`).
+# .clang-tidy — pragmatic defaults for C and C++.
 # Docs: https://clang.llvm.org/extra/clang-tidy/checks/list.html
 #
-# A pragmatic set for C: bug finders and static analysis on, purely stylistic
-# or very noisy checks off. Tune to taste.
+# Policy: on = catches real bugs and common mistakes;
+#         off = purely stylistic, or too noisy to act on.
+# Dry-run changes on one file first:  clang-tidy path/to/file.c
+
 Checks: >
   -*,
+
+  # ---- correctness / bug finders (C and C++) ----
   bugprone-*,
   cert-*,
   clang-analyzer-*,
   misc-*,
   performance-*,
   portability-*,
+
+  # ---- readability (subset kept, noisy ones excluded below) ----
   readability-*,
-  -bugprone-easily-swappable-parameters,
-  -bugprone-assignment-in-if-condition,
-  -cert-err33-c,
-  -misc-include-cleaner,
+
+  # ---- modernization (mostly C++; harmless no-ops in C) ----
+  modernize-*,
+
+  # ---- exclusions: noisy or opinionated ----
+  # bugprone
+  -bugprone-easily-swappable-parameters,  # argument order is usually obvious
+  -bugprone-assignment-in-if-condition,  # common C idiom
+  -bugprone-branch-clone,                # too noisy
+  # cert
+  -cert-err33-c,                         # error-handling boilerplate
+  -cert-err58-cpp,                       # noexcept boilerplate
+  -cert-oop54-cpp,                       # virtual-function rules, too strict
+  -cert-str34-c,                         # flags every strncpy/strcat/...
+  # misc
+  -misc-include-cleaner,                 # overlaps IWYU, noisy
+  # readability (style → let clang-format own it)
   -readability-braces-around-statements,
   -readability-identifier-length,
+  -readability-identifier-naming,        # needs a naming-table to be useful
   -readability-magic-numbers,
   -readability-function-cognitive-complexity,
   -readability-avoid-unconditional-preprocessor-if,
   -readability-uppercase-literal-suffix,
+  # modernize (opinionated or style)
+  -modernize-avoid-c-arrays,             # C arrays are fine
+  -modernize-concat-nested-namespaces,
+  -modernize-deprecated-headers,         # <iostream> etc. — legacy migration
+  -modernize-deprecated-ios-base-aliases,
+  -modernize-loop-convert,
+  -modernize-redundant-void-include,
+  -modernize-use-auto,
+  -modernize-use-nodiscard,
+  # clang-analyzer
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
 
-# Only report diagnostics for the project's headers and sources.
+# Optional, stricter C++ core guidelines — noisy, enable per project:
+#   cppcoreguidelines-*,
+#   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+#   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+#   -cppcoreguidelines-pro-type-reinterpret-cast,
+#   -cppcoreguidelines-pro-bounds-pointer-to-string
+
+# Only report diagnostics for the project's headers and sources
+# (adjust the directory list to your layout).
 HeaderFilterRegex: '^.*[/\\](include|src|tests)[/\\].*$'
 
+# In CI you may want real bug finders to be hard failures:
+# WarningsAsErrors: 'bugprone-*,clang-analyzer-*'
 WarningsAsErrors: ''
+
+# Any style-related checks respect the project's .clang-format.
 FormatStyle: file
+
+CheckOptions:
+  # Flag functions longer than 120 lines (default: 800).
+  - key: readability-function-size.FunctionThreshold
+    value: "120"
